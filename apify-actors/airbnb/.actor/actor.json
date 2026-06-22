@@ -1,0 +1,7 @@
+{
+  "actorSpecification": 1,
+  "name": "sparks-airbnb",
+  "title": "Sparks Aloja - airbnb scraper",
+  "version": "0.1",
+  "buildTag": "latest"
+}

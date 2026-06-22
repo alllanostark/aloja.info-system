@@ -1,0 +1,9 @@
+{
+  "name": "apify-actor-airbnb",
+  "version": "0.1.0",
+  "type": "module",
+  "engines": { "node": ">=18" },
+  "scripts": { "start": "node dist/main.js", "build": "tsc" },
+  "dependencies": { "apify": "^3.2.6", "crawlee": "^3.11.5", "playwright": "^1.46.0" },
+  "devDependencies": { "typescript": "^5.5.0", "@apify/tsconfig": "^0.1.0", "@types/node": "^20.0.0" }
+}

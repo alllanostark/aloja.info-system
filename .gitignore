@@ -2,6 +2,8 @@
 
 # dependencies
 /node_modules
+# nested node_modules (apify actors, etc.)
+**/node_modules/
 /.pnp
 .pnp.*
 .yarn/*
@@ -32,6 +34,12 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+
+# local data dumps with client PII (clientes/alojamentos) - keep out of git
+/data/
+
+# apify actors build output
+apify-actors/*/dist/
 
 # vercel
 .vercel

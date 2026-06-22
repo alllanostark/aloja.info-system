@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Atores Apify são projetos standalone (deps próprias) — fora do build da app.
+    "apify-actors/**",
   ]),
 ]);
 

@@ -1,26 +1,185 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* ════════════════════════════════════════════════════════════
+   SPARKS ALOJA — Design System 2026 (Production-Grade)
+   Refs: Linear (surface ladder + hairlines), Raycast (canvas
+   darkness), Vercel (spacing + tracking), Stripe (tabular nums)
+   ════════════════════════════════════════════════════════════ */
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* ── Canvas & Surface ladder ── */
+  --color-canvas: #07080a;
+  --color-surface-1: #0d0f12;
+  --color-surface-2: #111318;
+  --color-surface-3: #181b22;
+  --color-surface-4: #1f2330;
+  --color-surface-5: #272c3a;
+
+  /* ── Marca Sparks (laranja) ── */
+  --color-orange-300: #fdb06a;
+  --color-orange-400: #fb923c;
+  --color-orange-500: #f97316;
+  --color-orange-600: #ea6c0a;
+  --color-orange-700: #c2550a;
+
+  /* ── Semânticas ── */
+  --color-green-400: #4ade80;
+  --color-green-500: #22c55e;
+  --color-red-400: #f87171;
+  --color-red-500: #ef4444;
+  --color-yellow-400: #fbbf24;
+  --color-yellow-500: #f59e0b;
+
+  /* ── Texto ── */
+  --color-ink: #f4f4f6;
+  --color-ink-muted: #a1a5b0;
+  --color-ink-subtle: #62666d;
+  --color-ink-disabled: #3a3d45;
+
+  /* ── Fonte ── */
+  --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
+
+  /* ── Radius (escala Linear) ── */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+  --radius-pill: 9999px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+:root {
+  /* Soft fills / borders / glows (rgba — não geram utilities) */
+  --orange-soft: rgba(249, 115, 22, 0.12);
+  --orange-soft-2: rgba(249, 115, 22, 0.2);
+  --orange-border: rgba(249, 115, 22, 0.25);
+  --orange-glow: rgba(249, 115, 22, 0.15);
+
+  --green-soft: rgba(34, 197, 94, 0.12);
+  --green-border: rgba(34, 197, 94, 0.25);
+  --green-glow: rgba(34, 197, 94, 0.15);
+
+  --red-soft: rgba(239, 68, 68, 0.12);
+  --red-border: rgba(239, 68, 68, 0.25);
+
+  --yellow-soft: rgba(245, 158, 11, 0.12);
+  --yellow-border: rgba(245, 158, 11, 0.25);
+
+  /* Hairlines */
+  --hairline: rgba(255, 255, 255, 0.06);
+  --hairline-medium: rgba(255, 255, 255, 0.1);
+  --hairline-strong: rgba(255, 255, 255, 0.16);
+  --hairline-hover: rgba(255, 255, 255, 0.2);
+
+  /* Glass */
+  --glass-bg: rgba(13, 15, 18, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.07);
+
+  /* Shadows */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.6);
+  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.45), 0 1px 3px rgba(0, 0, 0, 0.6);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.6);
+  --shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.6);
+
+  --glow-orange: 0 0 0 1px var(--orange-border), 0 0 20px var(--orange-glow);
+  --glow-green: 0 0 0 1px var(--green-border), 0 0 20px var(--green-glow);
+}
+
+/* ── Base ── */
+* {
+  border-color: var(--hairline);
+}
+
+html {
+  background: var(--color-canvas);
+  color-scheme: dark;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-feature-settings: "calt", "kern", "liga", "ss03";
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Números tabulares (Stripe-style) em preços/métricas */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Display tracking negativo (Linear/Vercel) */
+.tracking-display {
+  letter-spacing: -0.02em;
+}
+.tracking-display-tight {
+  letter-spacing: -0.04em;
+}
+
+/* Scrollbar discreta */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--hairline-strong);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--hairline-hover);
+  background-clip: padding-box;
+}
+
+/* Selection */
+::selection {
+  background: var(--orange-soft-2);
+  color: var(--color-ink);
+}
+
+/* Focus ring padrão (laranja, acessível) */
+:focus-visible {
+  outline: 2px solid var(--color-orange-500);
+  outline-offset: 2px;
+}
+
+/* Shimmer para skeletons */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--color-surface-2) 25%,
+    var(--color-surface-3) 50%,
+    var(--color-surface-2) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Pulse de vaga disponível */
+@keyframes vacancy-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+.vacancy-pulse {
+  animation: vacancy-pulse 2s ease-in-out infinite;
 }
