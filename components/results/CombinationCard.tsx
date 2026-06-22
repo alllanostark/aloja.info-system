@@ -72,10 +72,12 @@ export function CombinationCard({
   combo,
   workersNeeded,
   searchId,
+  budgetPerPerson,
 }: {
   combo: Combination;
   workersNeeded: number;
   searchId: string;
+  budgetPerPerson: number;
 }) {
   const { t } = useI18n();
   const [open, setOpen] = useState(false);
@@ -196,6 +198,7 @@ export function CombinationCard({
             combo={combo}
             workersNeeded={workersNeeded}
             searchId={searchId}
+            budgetPerPerson={budgetPerPerson}
             onClose={() => setOpen(false)}
           />
         )}
@@ -210,11 +213,13 @@ function CombinationModal({
   combo,
   workersNeeded,
   searchId,
+  budgetPerPerson,
   onClose,
 }: {
   combo: Combination;
   workersNeeded: number;
   searchId: string;
+  budgetPerPerson: number;
   onClose: () => void;
 }) {
   const { t } = useI18n();
@@ -322,14 +327,42 @@ function CombinationModal({
   }
 
   // ─── Share / Save ─────────────────────────────────────────────────────────
+
+  // BUG 3 fix: mapper EditableItem → SearchResult para buildProposalText
+  function itemToProposal(it: EditableItem): SearchResult {
+    return {
+      id: it.sourceId ?? "",
+      created_at: "",
+      search_id: "",
+      platform: it.platform ?? "idealista",
+      external_url: it.externalUrl,
+      title: it.title,
+      address: it.address,
+      lat: null,
+      lng: null,
+      total_price: it.finalPrice ?? it.monthlyRent,
+      num_beds: it.beds,
+      cost_per_person: null,
+      drive_minutes: it.driveMinutes,
+      furnished: it.furnished,
+      images: [],
+      raw_data: null,
+      status: "new",
+      is_demo: false,
+      honorarium: it.honorarium,
+      deposit: it.deposit,
+    } as SearchResult;
+  }
+
   function handleShare() {
-    const text = buildProposalText(combo.properties, {});
+    const text = buildProposalText(items.map(itemToProposal), { numWorkers: workersNeeded });
     navigator.clipboard.writeText(text).catch(() => undefined);
     window.open(whatsappUrl(text), "_blank");
     setShareLabel("copied");
     setTimeout(() => setShareLabel("default"), 2000);
   }
 
+  // BUG 5 fix: handleSave honesto — avisa quando há itens não-saveáveis
   function handleSave() {
     setSaveError(null);
     startTransition(async () => {
@@ -338,6 +371,25 @@ function CombinationModal({
           (it.sourceType === "search" || it.sourceType === "discarded") &&
           it.sourceId != null
       );
+      const skipped = items.length - saveable.length;
+
+      if (skipped > 0) {
+        if (saveable.length > 0) {
+          const results = await Promise.all(
+            saveable.map((it) =>
+              saveResult({ resultId: it.sourceId!, searchId })
+            )
+          );
+          const firstError = results.find((r) => r.error);
+          if (firstError?.error) {
+            setSaveError(firstError.error);
+            return;
+          }
+        }
+        setSaveError(t("combination.action.partialSave"));
+        return;
+      }
+
       const results = await Promise.all(
         saveable.map((it) =>
           saveResult({ resultId: it.sourceId!, searchId })
@@ -395,6 +447,14 @@ function CombinationModal({
     { value: duration, unit },
     workersNeeded
   );
+
+  // BUG 4 fix: withinBudget reativo — compara custo bruto mensal/pessoa vs teto
+  const monthlyRentTotal = resolvedItems.reduce(
+    (s, it) => s + (it.finalPrice ?? it.monthlyRent),
+    0
+  );
+  const grossCostPerPerson = workersNeeded > 0 ? monthlyRentTotal / workersNeeded : 0;
+  const withinBudget = grossCostPerPerson <= budgetPerPerson;
 
   const maxCost = Math.max(...items.map((it) => it.monthlyRent), 1);
   const unitLabel =
@@ -1031,7 +1091,7 @@ function CombinationModal({
                   <p
                     className={cn(
                       "tabular text-3xl font-bold tracking-tight",
-                      combo.withinBudget ? "text-green-400" : "text-orange-400"
+                      withinBudget ? "text-green-400" : "text-orange-400"
                     )}
                   >
                     {formatEuro(fin.netCost)}

@@ -6,7 +6,12 @@ import type { ActiveAccommodation, BedOccupant, Contact } from "@/types";
 
 export const dynamic = "force-dynamic";
 
-export default async function AccommodationsPage() {
+export default async function AccommodationsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string; contact?: string }>;
+}) {
+  const { tab, contact } = await searchParams;
   const supabase = await createClient();
   const profile = await getCurrentProfile();
   const admin = isAdmin(profile);
@@ -40,9 +45,11 @@ export default async function AccommodationsPage() {
     contactName: acc.contact_id ? (contactMap.get(acc.contact_id) ?? null) : null,
   }));
 
-  // Sumário usa o TOTAL GERAL (todos os status)
-  const totalBeds = accs.reduce((sum, a) => sum + a.total_beds, 0);
-  const occupiedCount = occupants.length;
+  // Sumário restrito a alojamentos ocupáveis (status 'active')
+  const occupiable = accs.filter((a) => (a.status ?? "active") === "active");
+  const occupiableIds = new Set(occupiable.map((a) => a.id));
+  const totalBeds = occupiable.reduce((sum, a) => sum + a.total_beds, 0);
+  const occupiedCount = occupants.filter((o) => occupiableIds.has(o.accommodation_id)).length;
   const vacantCount = totalBeds - occupiedCount;
 
   return (
@@ -105,7 +112,13 @@ export default async function AccommodationsPage() {
         </div>
 
         {/* Lista de alojamentos com tabs */}
-        <AccommodationsList items={items} isAdmin={admin} contacts={contacts} />
+        <AccommodationsList
+          items={items}
+          isAdmin={admin}
+          contacts={contacts}
+          initialTab={tab}
+          initialContactId={contact}
+        />
       </div>
     </>
   );

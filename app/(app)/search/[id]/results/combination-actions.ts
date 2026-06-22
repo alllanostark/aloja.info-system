@@ -94,27 +94,23 @@ export async function saveCombination(input: {
     return { error: (e as Error).message };
   }
 
+  if (!input.items || input.items.length === 0) {
+    return { error: "Uma composição precisa de ao menos um imóvel." };
+  }
+
   const supabase = await createClient();
   const { overrideId, searchId, label, durationValue, durationUnit, notes, items } = input;
 
   if (overrideId) {
-    const { error: updateErr } = await supabase
-      .from("combination_overrides")
-      .update({ label, duration_value: durationValue, duration_unit: durationUnit, notes: notes ?? null })
-      .eq("id", overrideId);
-    if (updateErr) return { error: updateErr.message };
-
-    const { error: deleteErr } = await supabase
-      .from("combination_items")
-      .delete()
-      .eq("combination_id", overrideId);
-    if (deleteErr) return { error: deleteErr.message };
-
-    const { error: insertErr } = await supabase
-      .from("combination_items")
-      .insert(items.map((it) => ({ ...it, combination_id: overrideId })));
-    if (insertErr) return { error: insertErr.message };
-
+    const { error: rpcErr } = await supabase.rpc("replace_combination", {
+      p_combination_id: overrideId,
+      p_label: label,
+      p_duration_value: durationValue,
+      p_duration_unit: durationUnit,
+      p_notes: notes ?? null,
+      p_items: items.map((it) => ({ ...it })),
+    });
+    if (rpcErr) return { error: rpcErr.message };
     revalidatePath("/history");
     return { error: null, overrideId };
   }

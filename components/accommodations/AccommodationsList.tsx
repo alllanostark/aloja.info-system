@@ -20,20 +20,34 @@ interface AccommodationsListProps {
   items: AccommodationWithOccupants[];
   isAdmin: boolean;
   contacts?: { id: string; name: string }[];
+  initialTab?: string;
+  initialContactId?: string;
 }
 
-export function AccommodationsList({ items, isAdmin, contacts = [] }: AccommodationsListProps) {
+export function AccommodationsList({
+  items,
+  isAdmin,
+  contacts = [],
+  initialTab,
+  initialContactId,
+}: AccommodationsListProps) {
   const { t } = useI18n();
-  const [activeTab, setActiveTab] = useState<TabStatus>("active");
+  const validInitialTab: TabStatus =
+    initialTab === "external" || initialTab === "inactive" ? initialTab : "active";
+  const [activeTab, setActiveTab] = useState<TabStatus>(validInitialTab);
   const [showForm, setShowForm] = useState(false);
   const [formMode, setFormMode] = useState<"searched" | "external">("searched");
 
   const countByStatus = (status: TabStatus) =>
     items.filter((i) => (i.accommodation.status ?? "active") === status).length;
 
-  const filtered = items.filter(
-    (i) => (i.accommodation.status ?? "active") === activeTab
-  );
+  const filtered = items.filter((i) => {
+    const matchesTab = (i.accommodation.status ?? "active") === activeTab;
+    const matchesContact = initialContactId
+      ? i.accommodation.contact_id === initialContactId
+      : true;
+    return matchesTab && matchesContact;
+  });
 
   const tabs: { id: TabStatus; label: string }[] = [
     { id: "active", label: t("accommodations.tabs.active") },

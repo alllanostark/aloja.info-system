@@ -153,6 +153,7 @@ export function ResultsView({
                     combo={combo}
                     workersNeeded={search.num_workers}
                     searchId={search.id}
+                    budgetPerPerson={search.budget_per_person}
                   />
                 ))}
               </div>

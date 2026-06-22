@@ -119,7 +119,7 @@ export async function addAccommodation(formData: FormData) {
   const { error } = await supabase.from("active_accommodations").insert({
     address: geo?.formattedAddress ?? address,
     city: (formData.get("city") as string) || null,
-    total_beds: isNaN(totalBeds) ? 1 : totalBeds,
+    total_beds: isNaN(totalBeds) ? (status === "external" ? 0 : 1) : totalBeds,
     monthly_rent: monthlyRent,
     lat: geo?.lat ?? null,
     lng: geo?.lng ?? null,

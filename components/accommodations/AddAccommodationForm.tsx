@@ -233,23 +233,25 @@ export function AddAccommodationForm({
             </div>
 
             {/* Nº camas + Renda */}
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <div>
-                <label htmlFor="aaf-total-beds" className={labelClass}>
-                  {t("accommodations.field.beds")} <span className="text-red-400">*</span>
-                </label>
-                <input
-                  id="aaf-total-beds"
-                  name="total_beds"
-                  type="number"
-                  min="1"
-                  step="1"
-                  required
-                  placeholder="4"
-                  inputMode="numeric"
-                  className={cn(inputClass, "tabular")}
-                />
-              </div>
+            <div className={cn("grid grid-cols-1 gap-3", mode !== "external" ? "sm:grid-cols-2" : "")}>
+              {mode !== "external" && (
+                <div>
+                  <label htmlFor="aaf-total-beds" className={labelClass}>
+                    {t("accommodations.field.beds")} <span className="text-red-400">*</span>
+                  </label>
+                  <input
+                    id="aaf-total-beds"
+                    name="total_beds"
+                    type="number"
+                    min="1"
+                    step="1"
+                    required
+                    placeholder="4"
+                    inputMode="numeric"
+                    className={cn(inputClass, "tabular")}
+                  />
+                </div>
+              )}
               <div>
                 <label htmlFor="aaf-monthly-rent" className={labelClass}>
                   {t("accommodations.field.rent")}

@@ -206,6 +206,7 @@ export type TranslationKey =
   | "combination.action.saving"
   | "combination.action.saved"
   | "combination.action.saveResult"
+  | "combination.action.partialSave"
   // Combination — furnish badge
   | "combination.furnish"
   // History — combination card
@@ -381,6 +382,7 @@ const dictionaries: Record<Locale, Dictionary> = {
     "combination.action.saving": "A guardar...",
     "combination.action.saved": "Guardado",
     "combination.action.saveResult": "Guardar combinação",
+    "combination.action.partialSave": "Imóveis ativos/externos não entram aqui — use 'Salvar composição'.",
     "combination.furnish": "Precisa Mobilar",
     "history.combination.netCost": "Custo líquido",
     "history.combination.property": "imóvel",
@@ -549,6 +551,7 @@ const dictionaries: Record<Locale, Dictionary> = {
     "combination.action.saving": "Guardando...",
     "combination.action.saved": "Guardado",
     "combination.action.saveResult": "Guardar combinación",
+    "combination.action.partialSave": "Inmuebles activos/externos no se incluyen aquí — usa 'Guardar composición'.",
     "combination.furnish": "Necesita Amueblarse",
     "history.combination.netCost": "Coste neto",
     "history.combination.property": "inmueble",
