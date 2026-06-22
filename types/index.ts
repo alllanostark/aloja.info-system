@@ -23,6 +23,13 @@ export type DiscardReason =
   | "condition"
   | "other";
 export type ContactRating = "good" | "neutral" | "bad";
+export type AccommodationStatus = "active" | "inactive" | "external";
+export type CombinationSourceType =
+  | "search"
+  | "active"
+  | "external"
+  | "discarded"
+  | "manual";
 
 export interface Profile {
   id: string;
@@ -69,6 +76,8 @@ export interface SearchResult {
   raw_data: Record<string, unknown> | null;
   status: ResultStatus;
   is_demo: boolean;
+  honorarium: number; // onda 5 — default 0
+  deposit: number;    // onda 5 — default 0
 }
 
 export interface SearchCombination {
@@ -100,6 +109,10 @@ export interface ActiveAccommodation {
   owner_name: string | null;
   owner_phone: string | null;
   notes: string | null;
+  status: AccommodationStatus;  // onda 5
+  contact_id: string | null;    // onda 5
+  honorarium: number;           // onda 5
+  deposit: number;              // onda 5
 }
 
 export interface BedOccupant {
@@ -134,6 +147,35 @@ export interface AccommodationOccupancy {
   total_beds: number;
   occupied: number;
   vacant: number;
+}
+
+// ─── Onda 5: composições editáveis ───────────────────────────────────────────
+
+export interface CombinationOverride {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  search_id: string;
+  label: string;
+  duration_value: number;
+  duration_unit: "months" | "weeks" | "days";
+  notes: string | null;
+}
+
+export interface CombinationItem {
+  id: string;
+  created_at: string;
+  combination_id: string;
+  source_type: CombinationSourceType;
+  source_id: string | null;
+  override_title: string | null;
+  override_beds: number | null;
+  override_drive_minutes: number | null;
+  override_monthly_rent: number | null;
+  override_deposit: number;
+  override_honorarium: number;
+  override_final_price: number | null;
+  position: number;
 }
 
 // Metadados das plataformas (badge cores / labels)
