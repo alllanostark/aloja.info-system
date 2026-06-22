@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Link from "next/link";
 import {
   Phone,
   Mail,
@@ -9,8 +10,10 @@ import {
   Trash2,
   CalendarClock,
   Loader2,
+  Home,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/lib/i18n";
 import { deleteContact, updateContactRating } from "@/app/(app)/history/actions";
 import type { Contact, ContactRating } from "@/types";
 
@@ -51,10 +54,15 @@ function formatLastUsed(iso: string | null) {
 export function ContactCard({
   contact,
   isAdmin,
+  linkedCount = 0,
+  highlighted = false,
 }: {
   contact: Contact;
   isAdmin: boolean;
+  linkedCount?: number;
+  highlighted?: boolean;
 }) {
+  const { t } = useI18n();
   const [isPendingDelete, startDelete] = useTransition();
   const [isPendingRating, startRating] = useTransition();
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -87,7 +95,8 @@ export function ContactCard({
       className={cn(
         "group relative rounded-[var(--radius-lg)] border border-[var(--hairline)] bg-surface-2 p-5",
         "transition-all duration-200 hover:border-[var(--hairline-medium)]",
-        "hover:shadow-[var(--shadow-md)]"
+        "hover:shadow-[var(--shadow-md)]",
+        highlighted && "ring-1 ring-[var(--orange-border)]"
       )}
     >
       {/* Cabeçalho */}
@@ -159,6 +168,21 @@ export function ContactCard({
           </div>
         )}
       </div>
+
+      {/* Alojamentos vinculados */}
+      {linkedCount > 0 && (
+        <div className="mt-3">
+          <Link
+            href={`/accommodations?tab=external&contact=${contact.id}`}
+            className="inline-flex items-center gap-1.5 text-xs text-orange-400 hover:underline"
+          >
+            <Home size={12} strokeWidth={1.5} />
+            <span>
+              {linkedCount} {t("contacts.linkedAccommodations")}
+            </span>
+          </Link>
+        </div>
+      )}
 
       {/* Notas */}
       {contact.notes && (

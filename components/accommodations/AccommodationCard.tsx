@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Link from "next/link";
 import {
   ChevronDown,
   ChevronUp,
@@ -13,16 +14,18 @@ import {
   Euro,
 } from "lucide-react";
 import { cn, formatEuro } from "@/lib/utils";
+import { useI18n } from "@/lib/i18n";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { BedSlot } from "@/components/accommodations/BedSlot";
 import { EditAccommodationTrigger } from "@/components/accommodations/EditAccommodationForm";
-import { removeAccommodation } from "@/app/(app)/accommodations/actions";
+import { removeAccommodation, updateAccommodationStatus } from "@/app/(app)/accommodations/actions";
 import type { ActiveAccommodation, BedOccupant } from "@/types";
 
 interface AccommodationCardProps {
   accommodation: ActiveAccommodation;
   occupants: BedOccupant[];
   isAdmin: boolean;
+  contactName?: string | null;
 }
 
 function formatDate(dateStr: string | null): string {
@@ -60,11 +63,15 @@ export function AccommodationCard({
   accommodation,
   occupants,
   isAdmin,
+  contactName,
 }: AccommodationCardProps) {
+  const { t } = useI18n();
   const [expanded, setExpanded] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [isDeleting, startDeleteTransition] = useTransition();
+  const [isStatusChanging, startStatusTransition] = useTransition();
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [statusError, setStatusError] = useState<string | null>(null);
 
   const occupiedBeds = occupants.filter((o) => o.exit_date === null);
   const occupiedCount = occupiedBeds.length;
@@ -75,6 +82,8 @@ export function AccommodationCard({
       : null;
 
   const showFurnishBadge = needsFurnishing(accommodation);
+  const isExternal = accommodation.status === "external";
+  const isInactive = accommodation.status === "inactive";
 
   function getOccupantForBed(bedNumber: number): BedOccupant | null {
     return occupiedBeds.find((o) => o.bed_number === bedNumber) ?? null;
@@ -91,11 +100,21 @@ export function AccommodationCard({
     });
   }
 
+  function handleStatusToggle() {
+    setStatusError(null);
+    const nextStatus = isInactive ? "active" : "inactive";
+    startStatusTransition(async () => {
+      const result = await updateAccommodationStatus({ id: accommodation.id, status: nextStatus });
+      if (result.error) setStatusError(result.error);
+    });
+  }
+
   return (
     <div
       className={cn(
         "rounded-[var(--radius-lg)] border border-[var(--hairline)] bg-surface-2 transition-all duration-200",
-        "hover:border-[var(--hairline-medium)] hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)]"
+        "hover:border-[var(--hairline-medium)] hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)]",
+        isInactive && "opacity-70"
       )}
     >
       {/* Header do card */}
@@ -134,9 +153,22 @@ export function AccommodationCard({
               </p>
             )}
 
+            {/* Link de contacto vinculado (apenas externos) */}
+            {isExternal && contactName && accommodation.contact_id && (
+              <Link
+                href={`/contacts?id=${accommodation.contact_id}`}
+                onClick={(e) => e.stopPropagation()}
+                className="mt-0.5 block text-xs text-orange-400 hover:underline"
+              >
+                {contactName}
+              </Link>
+            )}
+
             {/* Badges de estado */}
             <div className="mt-3 flex flex-wrap items-center gap-2">
-              {vacantCount > 0 ? (
+              {isExternal ? (
+                <StatusBadge variant="external" label={t("accommodations.external.badge")} />
+              ) : vacantCount > 0 ? (
                 <StatusBadge
                   variant="available"
                   label={`${vacantCount} ${vacantCount === 1 ? "vaga" : "vagas"}`}
@@ -157,23 +189,27 @@ export function AccommodationCard({
                 </p>
                 <p className="text-[10px] text-ink-subtle mt-0.5">total</p>
               </div>
-              <div className="text-center">
-                <p className="tabular text-lg font-bold text-red-400 leading-none">
-                  {occupiedCount}
-                </p>
-                <p className="text-[10px] text-ink-subtle mt-0.5">ocup.</p>
-              </div>
-              <div className="text-center">
-                <p
-                  className={cn(
-                    "tabular text-lg font-bold leading-none",
-                    vacantCount > 0 ? "text-green-400" : "text-ink-subtle"
-                  )}
-                >
-                  {vacantCount}
-                </p>
-                <p className="text-[10px] text-ink-subtle mt-0.5">vagas</p>
-              </div>
+              {!isExternal && (
+                <>
+                  <div className="text-center">
+                    <p className="tabular text-lg font-bold text-red-400 leading-none">
+                      {occupiedCount}
+                    </p>
+                    <p className="text-[10px] text-ink-subtle mt-0.5">ocup.</p>
+                  </div>
+                  <div className="text-center">
+                    <p
+                      className={cn(
+                        "tabular text-lg font-bold leading-none",
+                        vacantCount > 0 ? "text-green-400" : "text-ink-subtle"
+                      )}
+                    >
+                      {vacantCount}
+                    </p>
+                    <p className="text-[10px] text-ink-subtle mt-0.5">vagas</p>
+                  </div>
+                </>
+              )}
             </div>
             <div className="ml-2 text-ink-subtle transition-colors">
               {expanded ? (
@@ -195,14 +231,36 @@ export function AccommodationCard({
               {formatEuro(accommodation.monthly_rent)}
             </p>
           </div>
-          <div>
-            <p className="text-[10px] uppercase tracking-wider text-ink-subtle">
-              Custo/pessoa
-            </p>
-            <p className="tabular text-sm font-medium text-ink">
-              {formatEuro(costPP)}
-            </p>
-          </div>
+          {!isExternal && (
+            <div>
+              <p className="text-[10px] uppercase tracking-wider text-ink-subtle">
+                Custo/pessoa
+              </p>
+              <p className="tabular text-sm font-medium text-ink">
+                {formatEuro(costPP)}
+              </p>
+            </div>
+          )}
+          {accommodation.honorarium > 0 && (
+            <div>
+              <p className="text-[10px] uppercase tracking-wider text-ink-subtle">
+                {t("accommodations.field.honorarium")}
+              </p>
+              <p className="tabular text-sm font-medium text-ink">
+                {formatEuro(accommodation.honorarium)}
+              </p>
+            </div>
+          )}
+          {accommodation.deposit > 0 && (
+            <div>
+              <p className="text-[10px] uppercase tracking-wider text-ink-subtle">
+                {t("accommodations.field.deposit")}
+              </p>
+              <p className="tabular text-sm font-medium text-ink">
+                {formatEuro(accommodation.deposit)}
+              </p>
+            </div>
+          )}
           <div>
             <p className="text-[10px] uppercase tracking-wider text-ink-subtle">
               Proprietário
@@ -247,6 +305,21 @@ export function AccommodationCard({
             {isAdmin && !confirmDelete && (
               <div className="flex items-center gap-3">
                 <EditAccommodationTrigger accommodation={accommodation} />
+                {!isExternal && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleStatusToggle();
+                    }}
+                    disabled={isStatusChanging}
+                    className="flex items-center gap-1 text-xs text-ink-subtle transition-colors hover:text-amber-400 cursor-pointer disabled:opacity-50"
+                    aria-label={isInactive ? "Reativar alojamento" : "Inativar alojamento"}
+                  >
+                    {isStatusChanging && <Loader2 size={12} className="animate-spin" />}
+                    {isInactive ? "Reativar" : "Inativar"}
+                  </button>
+                )}
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -285,21 +358,26 @@ export function AccommodationCard({
           {deleteError && (
             <p className="mb-3 text-xs text-red-400">{deleteError}</p>
           )}
+          {statusError && (
+            <p className="mb-3 text-xs text-red-400">{statusError}</p>
+          )}
 
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-            {Array.from(
-              { length: accommodation.total_beds },
-              (_, i) => i + 1
-            ).map((bedNum) => (
-              <BedSlot
-                key={bedNum}
-                accommodationId={accommodation.id}
-                bedNumber={bedNum}
-                occupant={getOccupantForBed(bedNum)}
-                isAdmin={isAdmin}
-              />
-            ))}
-          </div>
+          {!isExternal && (
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              {Array.from(
+                { length: accommodation.total_beds },
+                (_, i) => i + 1
+              ).map((bedNum) => (
+                <BedSlot
+                  key={bedNum}
+                  accommodationId={accommodation.id}
+                  bedNumber={bedNum}
+                  occupant={getOccupantForBed(bedNum)}
+                  isAdmin={isAdmin}
+                />
+              ))}
+            </div>
+          )}
 
           {accommodation.notes && (
             <div className="mt-4 rounded-[var(--radius-sm)] border border-[var(--hairline)] bg-surface-3 px-4 py-3">

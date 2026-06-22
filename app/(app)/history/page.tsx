@@ -1,29 +1,33 @@
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile, isAdmin } from "@/lib/auth";
+import { redirect } from "next/navigation";
 import { TopBar } from "@/components/layout/TopBar";
 import { HistoryTabs } from "@/components/history/HistoryTabs";
-import type { Search, Contact } from "@/types";
+import type { Search } from "@/types";
 
 export const dynamic = "force-dynamic";
 
-export default async function HistoryPage() {
+export default async function HistoryPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string }>;
+}) {
+  const { tab } = await searchParams;
+
+  if (tab === "contacts") {
+    redirect("/contacts");
+  }
+
   const supabase = await createClient();
   const profile = await getCurrentProfile();
   const admin = isAdmin(profile);
 
-  const [{ data: searchesData }, { data: contactsData }] = await Promise.all([
-    supabase
-      .from("searches")
-      .select("*")
-      .order("created_at", { ascending: false }),
-    supabase
-      .from("contacts")
-      .select("*")
-      .order("last_used", { ascending: false, nullsFirst: false }),
-  ]);
+  const { data: searchesData } = await supabase
+    .from("searches")
+    .select("*")
+    .order("created_at", { ascending: false });
 
   const searches = (searchesData ?? []) as Search[];
-  const contacts = (contactsData ?? []) as Contact[];
 
   const stats = {
     total: searches.length,
@@ -41,13 +45,12 @@ export default async function HistoryPage() {
             Histórico
           </h2>
           <p className="mt-1 text-sm text-ink-subtle">
-            Buscas passadas e base de contactos de proprietários e agências.
+            Buscas passadas de alojamentos para obras.
           </p>
         </div>
 
         <HistoryTabs
           searches={searches}
-          contacts={contacts}
           isAdmin={admin}
           stats={stats}
         />

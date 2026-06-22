@@ -1,27 +1,23 @@
 "use client";
 
 import { useState } from "react";
-import { History, UsersRound } from "lucide-react";
+import { History } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SearchHistoryList } from "./SearchHistoryList";
-import { ContactsList } from "./ContactsList";
-import type { Search, Contact } from "@/types";
+import type { Search } from "@/types";
 
-type Tab = "searches" | "contacts";
+type Tab = "searches";
 
 const TABS: { id: Tab; label: string; icon: typeof History }[] = [
   { id: "searches", label: "Buscas", icon: History },
-  { id: "contacts", label: "Contactos", icon: UsersRound },
 ];
 
 export function HistoryTabs({
   searches,
-  contacts,
   isAdmin,
   stats,
 }: {
   searches: Search[];
-  contacts: Contact[];
   isAdmin: boolean;
   stats: { total: number; completed: number; active: number };
 }) {
@@ -55,14 +51,14 @@ export function HistoryTabs({
                     : "bg-surface-3 text-ink-subtle"
                 )}
               >
-                {tab.id === "searches" ? searches.length : contacts.length}
+                {searches.length}
               </span>
             </button>
           );
         })}
       </div>
 
-      {/* Contadores de buscas - só na aba de buscas */}
+      {/* Contadores */}
       {active === "searches" && (
         <div className="flex flex-wrap items-center gap-6">
           <Stat label="Total" value={stats.total} />
@@ -72,11 +68,7 @@ export function HistoryTabs({
       )}
 
       {/* Conteúdo */}
-      {active === "searches" ? (
-        <SearchHistoryList searches={searches} />
-      ) : (
-        <ContactsList contacts={contacts} isAdmin={isAdmin} />
-      )}
+      {active === "searches" && <SearchHistoryList searches={searches} />}
     </div>
   );
 }

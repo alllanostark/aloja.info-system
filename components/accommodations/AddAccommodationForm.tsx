@@ -1,20 +1,37 @@
 "use client";
 
 import { useState, useTransition, useRef, useCallback } from "react";
-import { X, Loader2, Building2 } from "lucide-react";
+import { X, Loader2, Building2, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/lib/i18n";
 import { addAccommodation } from "@/app/(app)/accommodations/actions";
 import { useFocusTrap } from "@/lib/useFocusTrap";
 
+type Mode = "searched" | "external";
+
 interface AddAccommodationFormProps {
   onClose: () => void;
+  initialMode?: Mode;
+  contacts?: { id: string; name: string }[];
 }
 
-export function AddAccommodationForm({ onClose }: AddAccommodationFormProps) {
+const inputClass =
+  "w-full rounded-[var(--radius-md)] border border-[var(--hairline-medium)] bg-surface-3 px-3.5 py-2.5 text-sm text-ink placeholder:text-ink-subtle focus:border-orange-500 focus:outline-none transition-colors";
+
+const labelClass = "mb-1.5 block text-xs font-medium text-ink-muted";
+
+export function AddAccommodationForm({
+  onClose,
+  initialMode = "searched",
+  contacts = [],
+}: AddAccommodationFormProps) {
+  const { t } = useI18n();
   const formRef = useRef<HTMLFormElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [mode, setMode] = useState<Mode>(initialMode);
+  const [showNewContact, setShowNewContact] = useState(false);
 
   const handleClose = useCallback(() => onClose(), [onClose]);
   useFocusTrap(panelRef, true, handleClose);
@@ -41,7 +58,7 @@ export function AddAccommodationForm({ onClose }: AddAccommodationFormProps) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center p-4 sm:items-center"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
       role="dialog"
       aria-modal="true"
       aria-label="Adicionar alojamento"
@@ -56,7 +73,7 @@ export function AddAccommodationForm({ onClose }: AddAccommodationFormProps) {
       <div
         ref={panelRef}
         className={cn(
-          "relative z-10 w-full max-w-lg rounded-[var(--radius-xl)] border border-[var(--hairline-medium)]",
+          "relative z-10 w-full max-w-2xl rounded-[var(--radius-xl)] border border-[var(--hairline-medium)]",
           "bg-surface-2 shadow-[var(--shadow-xl)] overflow-hidden"
         )}
       >
@@ -71,23 +88,126 @@ export function AddAccommodationForm({ onClose }: AddAccommodationFormProps) {
             </h2>
           </div>
           <button
+            type="button"
             onClick={onClose}
+            aria-label={t("action.close")}
             className="flex h-7 w-7 items-center justify-center rounded-[var(--radius-sm)] text-ink-subtle transition-colors hover:bg-surface-4 hover:text-ink cursor-pointer"
           >
             <X size={16} strokeWidth={1.5} />
           </button>
         </div>
 
+        {/* Toggle de modo */}
+        <div className="border-b border-[var(--hairline)] px-6 py-3">
+          <div className="flex items-center gap-1 rounded-[var(--radius-lg)] border border-[var(--hairline)] bg-surface-2 p-1 w-fit">
+            {(["searched", "external"] as Mode[]).map((m) => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => setMode(m)}
+                className={cn(
+                  "flex cursor-pointer items-center gap-2 rounded-[var(--radius-md)] px-4 py-2 text-sm font-medium",
+                  "transition-all duration-150",
+                  mode === m
+                    ? "bg-surface-4 text-ink shadow-[var(--shadow-xs)]"
+                    : "text-ink-muted hover:text-ink"
+                )}
+              >
+                {m === "searched" ? t("accommodations.form.mode.searched") : t("accommodations.form.mode.external")}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Formulário */}
         <form
           ref={formRef}
           onSubmit={handleSubmit}
-          className="max-h-[70vh] overflow-y-auto px-6 py-5"
+          className="max-h-[65vh] overflow-y-auto px-6 py-5"
         >
+          {/* Hidden: status */}
+          <input
+            type="hidden"
+            name="status"
+            value={mode === "external" ? "external" : "active"}
+          />
+
           <div className="space-y-4">
+            {/* Secção exclusiva de externos: contacto vinculado */}
+            {mode === "external" && (
+              <div className="rounded-[var(--radius-md)] border border-[var(--hairline)] bg-surface-3 px-4 py-4 space-y-3">
+                {!showNewContact ? (
+                  <div>
+                    <label htmlFor="aaf-contact-id" className={labelClass}>
+                      {t("accommodations.form.contact")}
+                    </label>
+                    <select
+                      id="aaf-contact-id"
+                      name="contact_id"
+                      className={inputClass}
+                    >
+                      <option value="">{t("accommodations.form.contactNone")}</option>
+                      {contacts.map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.name}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() => setShowNewContact(true)}
+                      className="mt-2 flex items-center gap-1 text-xs text-orange-400 hover:underline cursor-pointer"
+                    >
+                      <Plus size={12} strokeWidth={2} />
+                      {t("accommodations.form.createContact")}
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs font-medium text-ink-muted">{t("accommodations.form.createContact")}</p>
+                      <button
+                        type="button"
+                        onClick={() => setShowNewContact(false)}
+                        className="text-xs text-ink-subtle hover:text-ink cursor-pointer"
+                      >
+                        {t("action.cancel")}
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label htmlFor="aaf-new-contact-name" className={labelClass}>
+                          Nome <span className="text-red-400">*</span>
+                        </label>
+                        <input
+                          id="aaf-new-contact-name"
+                          name="new_contact_name"
+                          required={showNewContact}
+                          placeholder="Josep Sala"
+                          className={inputClass}
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="aaf-new-contact-phone" className={labelClass}>
+                          Telefone
+                        </label>
+                        <input
+                          id="aaf-new-contact-phone"
+                          name="new_contact_phone"
+                          type="tel"
+                          placeholder="+34 600 000 000"
+                          className={inputClass}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Endereço */}
             <div>
-              <label htmlFor="aaf-address" className="mb-1.5 block text-xs font-medium text-ink-muted">
+              <label htmlFor="aaf-address" className={labelClass}>
                 Endereço <span className="text-red-400">*</span>
               </label>
               <input
@@ -95,27 +215,27 @@ export function AddAccommodationForm({ onClose }: AddAccommodationFormProps) {
                 name="address"
                 required
                 placeholder="Rua Exemple, 12, 3º"
-                className="w-full rounded-[var(--radius-md)] border border-[var(--hairline-medium)] bg-surface-3 px-3.5 py-2.5 text-sm text-ink placeholder:text-ink-subtle focus:border-orange-500 focus:outline-none transition-colors"
+                className={inputClass}
               />
             </div>
 
             {/* Cidade */}
             <div>
-              <label htmlFor="aaf-city" className="mb-1.5 block text-xs font-medium text-ink-muted">
+              <label htmlFor="aaf-city" className={labelClass}>
                 Cidade
               </label>
               <input
                 id="aaf-city"
                 name="city"
                 placeholder="Barcelona"
-                className="w-full rounded-[var(--radius-md)] border border-[var(--hairline-medium)] bg-surface-3 px-3.5 py-2.5 text-sm text-ink placeholder:text-ink-subtle focus:border-orange-500 focus:outline-none transition-colors"
+                className={inputClass}
               />
             </div>
 
             {/* Nº camas + Renda */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label htmlFor="aaf-total-beds" className="mb-1.5 block text-xs font-medium text-ink-muted">
+                <label htmlFor="aaf-total-beds" className={labelClass}>
                   Nº de camas <span className="text-red-400">*</span>
                 </label>
                 <input
@@ -125,11 +245,12 @@ export function AddAccommodationForm({ onClose }: AddAccommodationFormProps) {
                   min="1"
                   required
                   placeholder="4"
-                  className="w-full rounded-[var(--radius-md)] border border-[var(--hairline-medium)] bg-surface-3 px-3.5 py-2.5 text-sm text-ink tabular placeholder:text-ink-subtle focus:border-orange-500 focus:outline-none transition-colors"
+                  inputMode="decimal"
+                  className={cn(inputClass, "tabular")}
                 />
               </div>
               <div>
-                <label htmlFor="aaf-monthly-rent" className="mb-1.5 block text-xs font-medium text-ink-muted">
+                <label htmlFor="aaf-monthly-rent" className={labelClass}>
                   Renda mensal (€)
                 </label>
                 <input
@@ -139,46 +260,81 @@ export function AddAccommodationForm({ onClose }: AddAccommodationFormProps) {
                   min="0"
                   step="0.01"
                   placeholder="1200"
-                  className="w-full rounded-[var(--radius-md)] border border-[var(--hairline-medium)] bg-surface-3 px-3.5 py-2.5 text-sm text-ink tabular placeholder:text-ink-subtle focus:border-orange-500 focus:outline-none transition-colors"
+                  inputMode="decimal"
+                  className={cn(inputClass, "tabular")}
+                />
+              </div>
+            </div>
+
+            {/* Honorário + Calção */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label htmlFor="aaf-honorarium" className={labelClass}>
+                  {t("accommodations.field.honorarium")}
+                </label>
+                <input
+                  id="aaf-honorarium"
+                  name="honorarium"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  defaultValue="0"
+                  inputMode="decimal"
+                  className={cn(inputClass, "tabular")}
+                />
+              </div>
+              <div>
+                <label htmlFor="aaf-deposit" className={labelClass}>
+                  {t("accommodations.field.deposit")}
+                </label>
+                <input
+                  id="aaf-deposit"
+                  name="deposit"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  defaultValue="0"
+                  inputMode="decimal"
+                  className={cn(inputClass, "tabular")}
                 />
               </div>
             </div>
 
             {/* Obra */}
             <div>
-              <label htmlFor="aaf-obra-name" className="mb-1.5 block text-xs font-medium text-ink-muted">
+              <label htmlFor="aaf-obra-name" className={labelClass}>
                 Obra associada
               </label>
               <input
                 id="aaf-obra-name"
                 name="obra_name"
                 placeholder="Obra Hospitalet"
-                className="w-full rounded-[var(--radius-md)] border border-[var(--hairline-medium)] bg-surface-3 px-3.5 py-2.5 text-sm text-ink placeholder:text-ink-subtle focus:border-orange-500 focus:outline-none transition-colors"
+                className={inputClass}
               />
             </div>
 
             {/* Datas de contrato */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label htmlFor="aaf-contract-start" className="mb-1.5 block text-xs font-medium text-ink-muted">
+                <label htmlFor="aaf-contract-start" className={labelClass}>
                   Início do contrato
                 </label>
                 <input
                   id="aaf-contract-start"
                   name="contract_start"
                   type="date"
-                  className="w-full rounded-[var(--radius-md)] border border-[var(--hairline-medium)] bg-surface-3 px-3.5 py-2.5 text-sm text-ink focus:border-orange-500 focus:outline-none transition-colors"
+                  className={inputClass}
                 />
               </div>
               <div>
-                <label htmlFor="aaf-contract-end" className="mb-1.5 block text-xs font-medium text-ink-muted">
+                <label htmlFor="aaf-contract-end" className={labelClass}>
                   Fim do contrato
                 </label>
                 <input
                   id="aaf-contract-end"
                   name="contract_end"
                   type="date"
-                  className="w-full rounded-[var(--radius-md)] border border-[var(--hairline-medium)] bg-surface-3 px-3.5 py-2.5 text-sm text-ink focus:border-orange-500 focus:outline-none transition-colors"
+                  className={inputClass}
                 />
               </div>
             </div>
@@ -186,18 +342,18 @@ export function AddAccommodationForm({ onClose }: AddAccommodationFormProps) {
             {/* Proprietário + telefone */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label htmlFor="aaf-owner-name" className="mb-1.5 block text-xs font-medium text-ink-muted">
+                <label htmlFor="aaf-owner-name" className={labelClass}>
                   Proprietário
                 </label>
                 <input
                   id="aaf-owner-name"
                   name="owner_name"
                   placeholder="Josep Sala"
-                  className="w-full rounded-[var(--radius-md)] border border-[var(--hairline-medium)] bg-surface-3 px-3.5 py-2.5 text-sm text-ink placeholder:text-ink-subtle focus:border-orange-500 focus:outline-none transition-colors"
+                  className={inputClass}
                 />
               </div>
               <div>
-                <label htmlFor="aaf-owner-phone" className="mb-1.5 block text-xs font-medium text-ink-muted">
+                <label htmlFor="aaf-owner-phone" className={labelClass}>
                   Telefone
                 </label>
                 <input
@@ -205,18 +361,13 @@ export function AddAccommodationForm({ onClose }: AddAccommodationFormProps) {
                   name="owner_phone"
                   type="tel"
                   placeholder="+34 600 000 000"
-                  className="w-full rounded-[var(--radius-md)] border border-[var(--hairline-medium)] bg-surface-3 px-3.5 py-2.5 text-sm text-ink placeholder:text-ink-subtle focus:border-orange-500 focus:outline-none transition-colors"
+                  className={inputClass}
                 />
               </div>
             </div>
 
             {/* Mobilado */}
             <div>
-              {/*
-               * Radio group: usa <fieldset>/<legend> para associação semântica
-               * correta de grupo. Os <label> individuais já envolvem os inputs
-               * (associação implícita válida para radios dentro do mesmo label).
-               */}
               <fieldset className="border-none p-0 m-0">
                 <legend className="mb-1.5 text-xs font-medium text-ink-muted">
                   Mobilado?
@@ -248,7 +399,7 @@ export function AddAccommodationForm({ onClose }: AddAccommodationFormProps) {
 
             {/* Notas */}
             <div>
-              <label htmlFor="aaf-notes" className="mb-1.5 block text-xs font-medium text-ink-muted">
+              <label htmlFor="aaf-notes" className={labelClass}>
                 Notas
               </label>
               <textarea
@@ -256,7 +407,7 @@ export function AddAccommodationForm({ onClose }: AddAccommodationFormProps) {
                 name="notes"
                 rows={3}
                 placeholder="Informações adicionais sobre o imóvel..."
-                className="w-full resize-none rounded-[var(--radius-md)] border border-[var(--hairline-medium)] bg-surface-3 px-3.5 py-2.5 text-sm text-ink placeholder:text-ink-subtle focus:border-orange-500 focus:outline-none transition-colors"
+                className={cn(inputClass, "resize-none")}
               />
             </div>
           </div>
@@ -275,17 +426,16 @@ export function AddAccommodationForm({ onClose }: AddAccommodationFormProps) {
             onClick={onClose}
             className="rounded-[var(--radius-md)] border border-[var(--hairline)] px-4 py-2 text-sm text-ink-muted transition-colors hover:bg-surface-4 hover:text-ink cursor-pointer"
           >
-            Cancelar
+            {t("action.cancel")}
           </button>
           <button
             type="submit"
-            form={formRef.current?.id}
             onClick={() => formRef.current?.requestSubmit()}
             disabled={isPending}
             className="flex items-center gap-2 rounded-[var(--radius-md)] bg-orange-500 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-orange-400 active:scale-[0.99] cursor-pointer disabled:opacity-50"
           >
             {isPending && <Loader2 size={14} className="animate-spin" />}
-            Guardar alojamento
+            {t("action.save")}
           </button>
         </div>
       </div>

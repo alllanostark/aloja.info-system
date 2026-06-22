@@ -70,6 +70,7 @@ export async function importAgenciesNearObra({
     if (error) return { error: error.message };
 
     revalidatePath("/history");
+    revalidatePath("/contacts");
     return { found: agencies.length, added: toInsert.length };
   } catch (err) {
     return {

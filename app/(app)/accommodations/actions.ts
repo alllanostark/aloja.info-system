@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/auth";
 import { geocode } from "@/lib/maps";
+import type { AccommodationStatus } from "@/types";
 
 function revalidate() {
   revalidatePath("/accommodations");
@@ -88,9 +89,31 @@ export async function addAccommodation(formData: FormData) {
     ? parseFloat(formData.get("monthly_rent") as string)
     : null;
 
+  const rawStatus = formData.get("status") as string | null;
+  const status: AccommodationStatus =
+    rawStatus === "inactive" || rawStatus === "external" ? rawStatus : "active";
+
+  const honorarium = parseFloat(formData.get("honorarium") as string) || 0;
+  const deposit = parseFloat(formData.get("deposit") as string) || 0;
+
+  // Contacto: prioriza criar novo se new_contact_name vier preenchido
+  let contact_id: string | null = null;
+  const newContactName = (formData.get("new_contact_name") as string)?.trim();
+  if (newContactName) {
+    const newContactPhone = (formData.get("new_contact_phone") as string)?.trim() || null;
+    const { data: newContact, error: contactError } = await supabase
+      .from("contacts")
+      .insert({ name: newContactName, phone: newContactPhone, rating: "neutral" })
+      .select("id")
+      .single();
+    if (contactError) return { error: contactError.message };
+    contact_id = newContact.id as string;
+  } else {
+    const rawContactId = (formData.get("contact_id") as string)?.trim();
+    contact_id = rawContactId || null;
+  }
+
   const address = (formData.get("address") as string) ?? "";
-  // Geocodar para popular lat/lng — necessário para a flag "Zona Conhecida" e
-  // para os pins do mapa. Degrada graciosamente (null) se a API falhar.
   const geo = await geocode(address);
 
   const { error } = await supabase.from("active_accommodations").insert({
@@ -107,7 +130,31 @@ export async function addAccommodation(formData: FormData) {
     owner_phone: (formData.get("owner_phone") as string) || null,
     notes: (formData.get("notes") as string) || null,
     furnished: formData.get("furnished") === "true",
+    status,
+    honorarium,
+    deposit,
+    contact_id,
   });
+
+  if (error) return { error: error.message };
+  revalidate();
+  return { error: null };
+}
+
+export async function updateAccommodationStatus({
+  id,
+  status,
+}: {
+  id: string;
+  status: AccommodationStatus;
+}): Promise<{ error: string | null }> {
+  await requireAdmin();
+  const supabase = await createClient();
+
+  const { error } = await supabase
+    .from("active_accommodations")
+    .update({ status })
+    .eq("id", id);
 
   if (error) return { error: error.message };
   revalidate();
