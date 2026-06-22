@@ -10,7 +10,30 @@
 //   - imóveis sem mobília são válidos (sinalizados)
 // ════════════════════════════════════════════════════════════
 
-import type { SearchResult } from "@/types";
+import type {
+  SearchResult,
+  CombinationSourceType,
+  PropertyPlatform,
+} from "@/types";
+
+// ─── EditableItem — tipo unificado para itens mutáveis da combinação ──────────
+
+export interface EditableItem {
+  key: string;
+  sourceType: CombinationSourceType;
+  sourceId: string | null;
+  title: string | null;
+  address: string | null;
+  platform: PropertyPlatform | null;
+  furnished: boolean;
+  beds: number;
+  driveMinutes: number | null;
+  monthlyRent: number;
+  deposit: number;
+  honorarium: number;
+  finalPrice: number | null;
+  externalUrl: string | null;
+}
 
 export interface Combination {
   type: "single" | "double" | "triple";
