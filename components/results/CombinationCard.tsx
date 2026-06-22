@@ -22,6 +22,8 @@ import {
 import { cn, formatEuro } from "@/lib/utils";
 import { buildProposalText, whatsappUrl } from "@/lib/proposal";
 import { saveResult } from "@/app/(app)/search/[id]/results/actions";
+import { saveCombination } from "@/app/(app)/search/[id]/results/combination-actions";
+import type { SaveCombinationItemInput } from "@/app/(app)/search/[id]/results/combination-actions";
 import { PLATFORM_META, type SearchResult } from "@/types";
 import type { Combination } from "@/lib/combinations";
 import {
@@ -247,6 +249,11 @@ function CombinationModal({
   const [savedOk, setSavedOk] = useState(false);
   const [isPending, startTransition] = useTransition();
 
+  // ─── Persistência de composição (Task 4.4) ────────────────────────────────
+  const [savedOverrideId, setSavedOverrideId] = useState<string | null>(null);
+  const [savingCombo, startComboTransition] = useTransition();
+  const [comboSavedOk, setComboSavedOk] = useState(false);
+
   // ─── Edição inline: iniciar ───────────────────────────────────────────────
   function startEdit(item: EditableItem) {
     setDraftItem({
@@ -343,6 +350,41 @@ function CombinationModal({
       }
       setSavedOk(true);
       setTimeout(() => onClose(), 800);
+    });
+  }
+
+  // ─── Salvar composição (Task 4.4) ─────────────────────────────────────────
+  function handleSaveCombo() {
+    setSaveError(null);
+    startComboTransition(async () => {
+      const mappedItems: SaveCombinationItemInput[] = items.map((it, index) => ({
+        source_type: it.sourceType,
+        source_id: it.sourceId,
+        override_title: it.title,
+        override_beds: it.beds,
+        override_drive_minutes: it.driveMinutes,
+        override_monthly_rent: it.monthlyRent,
+        override_deposit: it.deposit,
+        override_honorarium: it.honorarium,
+        override_final_price: it.finalPrice,
+        position: index,
+      }));
+      const result = await saveCombination({
+        overrideId: savedOverrideId,
+        searchId,
+        label,
+        durationValue: duration,
+        durationUnit: unit,
+        notes: note || null,
+        items: mappedItems,
+      });
+      if (result.error) {
+        setSaveError(result.error);
+        return;
+      }
+      setSavedOverrideId(result.overrideId ?? null);
+      setComboSavedOk(true);
+      setTimeout(() => setComboSavedOk(false), 2000);
     });
   }
 
@@ -1058,7 +1100,7 @@ function CombinationModal({
                 {saveError}
               </p>
             )}
-            <div className="flex items-center justify-end gap-2 border-t border-[var(--hairline)] pt-4">
+            <div className="flex flex-wrap items-center justify-end gap-2 border-t border-[var(--hairline)] pt-4">
               <button
                 onClick={handleShare}
                 className={cn(
@@ -1100,6 +1142,31 @@ function CombinationModal({
                 ) : (
                   <>
                     <BookmarkCheck size={13} strokeWidth={1.5} /> Guardar combinação
+                  </>
+                )}
+              </button>
+
+              <button
+                onClick={handleSaveCombo}
+                disabled={savingCombo}
+                className={cn(
+                  "flex items-center gap-1.5 rounded-[var(--radius-md)] border px-3 py-2 text-xs font-medium transition-all disabled:cursor-not-allowed",
+                  comboSavedOk
+                    ? "border-[var(--green-border)] bg-[var(--green-soft)] text-green-400"
+                    : "border-blue-500/40 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 disabled:opacity-60"
+                )}
+              >
+                {savingCombo ? (
+                  <>
+                    <Loader2 size={13} strokeWidth={1.5} className="animate-spin" /> A salvar...
+                  </>
+                ) : comboSavedOk ? (
+                  <>
+                    <Check size={13} strokeWidth={1.5} /> {t("combination.saved")}
+                  </>
+                ) : (
+                  <>
+                    💾 {savedOverrideId ? t("combination.update") : t("combination.saveAs")}
                   </>
                 )}
               </button>

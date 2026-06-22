@@ -1,27 +1,34 @@
 "use client";
 
 import { useState } from "react";
-import { History } from "lucide-react";
+import { History, Layers } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/lib/i18n";
 import { SearchHistoryList } from "./SearchHistoryList";
+import { CombinationsList } from "./CombinationsList";
 import type { Search } from "@/types";
+import type { CombinationSummary } from "./CombinationsList";
 
-type Tab = "searches";
-
-const TABS: { id: Tab; label: string; icon: typeof History }[] = [
-  { id: "searches", label: "Buscas", icon: History },
-];
+type Tab = "searches" | "combinations";
 
 export function HistoryTabs({
   searches,
   isAdmin,
   stats,
+  combinations,
 }: {
   searches: Search[];
   isAdmin: boolean;
   stats: { total: number; completed: number; active: number };
+  combinations: CombinationSummary[];
 }) {
+  const { t } = useI18n();
   const [active, setActive] = useState<Tab>("searches");
+
+  const TABS: { id: Tab; label: string; icon: typeof History; count: number }[] = [
+    { id: "searches", label: t("history.tabs.searches"), icon: History, count: searches.length },
+    { id: "combinations", label: t("history.tabs.combinations"), icon: Layers, count: combinations.length },
+  ];
 
   return (
     <div className="space-y-6">
@@ -51,14 +58,14 @@ export function HistoryTabs({
                     : "bg-surface-3 text-ink-subtle"
                 )}
               >
-                {searches.length}
+                {tab.count}
               </span>
             </button>
           );
         })}
       </div>
 
-      {/* Contadores */}
+      {/* Contadores — apenas na aba searches */}
       {active === "searches" && (
         <div className="flex flex-wrap items-center gap-6">
           <Stat label="Total" value={stats.total} />
@@ -69,6 +76,9 @@ export function HistoryTabs({
 
       {/* Conteúdo */}
       {active === "searches" && <SearchHistoryList searches={searches} />}
+      {active === "combinations" && (
+        <CombinationsList combinations={combinations} isAdmin={isAdmin} />
+      )}
     </div>
   );
 }
