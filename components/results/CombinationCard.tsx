@@ -121,16 +121,16 @@ export function CombinationCard({
             <Layers size={16} strokeWidth={1.5} className="text-orange-400" />
             <span className="text-sm font-semibold text-ink">{combo.label}</span>
             <span className="rounded-[var(--radius-pill)] bg-surface-4 px-2 py-0.5 text-[10px] text-ink-subtle">
-              {combo.properties.length} imóveis
+              {combo.properties.length} {t("combination.card.properties")}
             </span>
           </div>
           {combo.withinBudget ? (
             <span className="flex items-center gap-1 text-xs text-green-400">
-              <Check size={13} /> No orçamento
+              <Check size={13} /> {t("combination.card.withinBudget")}
             </span>
           ) : (
             <span className="flex items-center gap-1 text-xs text-yellow-400">
-              <AlertTriangle size={13} /> Acima
+              <AlertTriangle size={13} /> {t("combination.card.above")}
             </span>
           )}
         </div>
@@ -151,7 +151,7 @@ export function CombinationCard({
                 </span>
                 {!p.furnished && (
                   <span className="shrink-0 text-[10px] text-yellow-400">
-                    · mobilar
+                    · {t("combination.card.furnish")}
                   </span>
                 )}
               </div>
@@ -170,7 +170,7 @@ export function CombinationCard({
         {/* Totais */}
         <div className="mt-4 grid grid-cols-3 gap-3 border-t border-[var(--hairline)] pt-4">
           <Total
-            label="Custo líquido/mês"
+            label={t("combination.card.costPerMonth")}
             value={formatEuro(fin.netCost)}
             accent={combo.withinBudget ? "green" : "red"}
           />
@@ -186,7 +186,7 @@ export function CombinationCard({
         </div>
 
         <p className="mt-3 text-center text-[10px] text-ink-subtle">
-          Clica para detalhes e simulação de estadia
+          {t("combination.card.hint")}
         </p>
       </div>
 
@@ -398,7 +398,11 @@ function CombinationModal({
 
   const maxCost = Math.max(...items.map((it) => it.monthlyRent), 1);
   const unitLabel =
-    unit === "months" ? "meses" : unit === "weeks" ? "semanas" : "dias";
+    unit === "months"
+      ? t("combination.duration.months")
+      : unit === "weeks"
+        ? t("combination.duration.weeks")
+        : t("combination.duration.days");
 
   const excludeKeys = items.map((it) => it.key);
 
@@ -466,12 +470,12 @@ function CombinationModal({
                 </button>
               )}
               <span className="rounded-[var(--radius-pill)] bg-surface-4 px-2 py-0.5 text-[11px] text-ink-muted">
-                {items.length} imóveis
+                {items.length} {t("combination.card.properties")}
               </span>
             </div>
             <button
               onClick={onClose}
-              aria-label="Fechar modal"
+              aria-label={t("action.close")}
               className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-[var(--radius-md)] text-ink-subtle transition-colors hover:bg-surface-3 hover:text-ink"
             >
               <X size={18} />
@@ -502,7 +506,7 @@ function CombinationModal({
                       </span>
                       {!item.furnished && (
                         <span className="rounded-[var(--radius-pill)] border border-[var(--yellow-border)] bg-[var(--yellow-soft)] px-2 py-0.5 text-[10px] font-medium text-yellow-400">
-                          Precisa Mobilar
+                          {t("combination.furnish")}
                         </span>
                       )}
                     </div>
@@ -576,9 +580,9 @@ function CombinationModal({
                           : "—"}
                       </span>
                       <span className="tabular text-ink-muted">
-                        {formatEuro(item.finalPrice ?? item.monthlyRent)}/mês
+                        {formatEuro(item.finalPrice ?? item.monthlyRent)}{t("combination.card.perMonth")}
                         {item.finalPrice != null && (
-                          <span className="ml-1 text-orange-400">(negociado)</span>
+                          <span className="ml-1 text-orange-400">({t("combination.card.negotiated")})</span>
                         )}
                       </span>
                       {item.externalUrl && (
@@ -588,7 +592,7 @@ function CombinationModal({
                           rel="noopener noreferrer"
                           className="ml-auto flex items-center gap-1 text-orange-400 transition-colors hover:text-orange-300"
                         >
-                          <ExternalLink size={13} /> Ver anúncio
+                          <ExternalLink size={13} /> {t("action.viewAd")}
                         </a>
                       )}
                     </div>
@@ -597,7 +601,7 @@ function CombinationModal({
                   {/* Modo edição — grid 2×3 */}
                   {isEditing && (
                     <div className="mt-3">
-                      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
                         {/* Camas */}
                         <div>
                           <label
@@ -687,10 +691,11 @@ function CombinationModal({
                           <label
                             htmlFor={`honorarium-${item.key}`}
                             className="mb-1 block text-[11px] text-ink-subtle"
+                            title={t("tooltip.honorarium")}
                           >
                             {t("combination.field.honorarium")}{" "}
                             <span
-                              title={t("tooltip.honorarium")}
+                              aria-hidden="true"
                               className="cursor-help text-red-400"
                             >
                               ❌
@@ -701,7 +706,7 @@ function CombinationModal({
                             type="number"
                             inputMode="decimal"
                             min={0}
-                            step={10}
+                            step={0.01}
                             value={draftItem.honorarium ?? ""}
                             onChange={(e) =>
                               setDraftItem((d) => ({
@@ -714,6 +719,9 @@ function CombinationModal({
                             }
                             className="w-full rounded-[var(--radius-md)] border border-[var(--hairline-medium)] bg-surface-3 px-3 py-2 text-sm text-ink focus:border-orange-500 focus:outline-none"
                           />
+                          <span className="mt-0.5 block text-[11px] text-ink-subtle">
+                            ❌ {t("tooltip.honorarium")}
+                          </span>
                         </div>
 
                         {/* Calção */}
@@ -721,10 +729,11 @@ function CombinationModal({
                           <label
                             htmlFor={`deposit-${item.key}`}
                             className="mb-1 block text-[11px] text-ink-subtle"
+                            title={t("tooltip.deposit")}
                           >
                             {t("combination.field.deposit")}{" "}
                             <span
-                              title={t("tooltip.deposit")}
+                              aria-hidden="true"
                               className="cursor-help text-green-400"
                             >
                               ✅
@@ -735,7 +744,7 @@ function CombinationModal({
                             type="number"
                             inputMode="decimal"
                             min={0}
-                            step={10}
+                            step={0.01}
                             value={draftItem.deposit ?? ""}
                             onChange={(e) =>
                               setDraftItem((d) => ({
@@ -748,6 +757,9 @@ function CombinationModal({
                             }
                             className="w-full rounded-[var(--radius-md)] border border-[var(--hairline-medium)] bg-surface-3 px-3 py-2 text-sm text-ink focus:border-orange-500 focus:outline-none"
                           />
+                          <span className="mt-0.5 block text-[11px] text-ink-subtle">
+                            ✅ {t("tooltip.deposit")}
+                          </span>
                         </div>
 
                         {/* Preço final negociado */}
@@ -755,10 +767,11 @@ function CombinationModal({
                           <label
                             htmlFor={`finalPrice-${item.key}`}
                             className="mb-1 block text-[11px] text-ink-subtle"
+                            title={t("tooltip.finalPrice")}
                           >
                             {t("combination.field.finalPrice")}{" "}
                             <span
-                              title={t("tooltip.finalPrice")}
+                              aria-hidden="true"
                               className="cursor-help text-orange-400"
                             >
                               ✏️
@@ -769,7 +782,7 @@ function CombinationModal({
                             type="number"
                             inputMode="decimal"
                             min={0}
-                            step={10}
+                            step={0.01}
                             placeholder="—"
                             value={
                               draftItem.finalPrice != null
@@ -787,6 +800,9 @@ function CombinationModal({
                             }
                             className="w-full rounded-[var(--radius-md)] border border-[var(--hairline-medium)] bg-surface-3 px-3 py-2 text-sm text-ink focus:border-orange-500 focus:outline-none"
                           />
+                          <span className="mt-0.5 block text-[11px] text-ink-subtle">
+                            ✏️ {t("tooltip.finalPrice")}
+                          </span>
                         </div>
                       </div>
 
@@ -828,14 +844,17 @@ function CombinationModal({
 
           {/* SECÇÃO C — Seletor de duração */}
           <div className="mb-5">
-            <label className="mb-2 block text-xs font-medium uppercase tracking-wider text-ink-subtle">
-              Duração da estadia
+            <label htmlFor="combo-duration" className="mb-2 block text-xs font-medium uppercase tracking-wider text-ink-subtle">
+              {t("combination.duration.label")}
             </label>
             <div className="flex flex-wrap items-center gap-2">
               <input
+                id="combo-duration"
                 type="number"
+                inputMode="numeric"
                 min={1}
                 max={52}
+                step={1}
                 value={duration}
                 onChange={(e) =>
                   setDuration(
@@ -847,9 +866,9 @@ function CombinationModal({
               <div className="flex items-center gap-1 rounded-[var(--radius-md)] border border-[var(--hairline)] bg-surface-1 p-1">
                 {(
                   [
-                    ["months", "Meses"],
-                    ["weeks", "Semanas"],
-                    ["days", "Dias"],
+                    ["months", t("combination.duration.months")],
+                    ["weeks", t("combination.duration.weeks")],
+                    ["days", t("combination.duration.days")],
                   ] as const
                 ).map(([u, lbl]) => (
                   <button
@@ -1047,7 +1066,7 @@ function CombinationModal({
           {/* SECÇÃO E — Gráfico comparativo (sobre items[]) */}
           <div className="mb-6">
             <p className="mb-3 text-xs font-medium uppercase tracking-wider text-ink-subtle">
-              Distribuição de custo por imóvel
+              {t("combination.card.costDistribution")}
             </p>
             <div className="space-y-2.5">
               {items.map((item) => {
@@ -1060,7 +1079,7 @@ function CombinationModal({
                         {item.title ?? item.address}
                       </span>
                       <span className="tabular shrink-0 pl-2 text-ink-subtle">
-                        {formatEuro(rent)}/mês
+                        {formatEuro(rent)}{t("combination.card.perMonth")}
                       </span>
                     </div>
                     <div className="h-2 w-full overflow-hidden rounded-[var(--radius-pill)] bg-surface-3">
@@ -1081,13 +1100,14 @@ function CombinationModal({
 
           {/* SECÇÃO F — Nota */}
           <div className="mb-6">
-            <label className="mb-2 block text-xs font-medium uppercase tracking-wider text-ink-subtle">
-              Nota
+            <label htmlFor="combo-note" className="mb-2 block text-xs font-medium uppercase tracking-wider text-ink-subtle">
+              {t("combination.note.label")}
             </label>
             <textarea
+              id="combo-note"
               value={note}
               onChange={(e) => setNote(e.target.value)}
-              placeholder="Notas sobre esta combinação..."
+              placeholder={t("combination.note.placeholder")}
               rows={3}
               className="w-full resize-none rounded-[var(--radius-md)] border border-[var(--hairline-medium)] bg-surface-3 px-3.5 py-2.5 text-sm text-ink placeholder:text-ink-subtle focus:border-[var(--orange-border)] focus:outline-none"
             />
@@ -1112,11 +1132,11 @@ function CombinationModal({
               >
                 {shareLabel === "copied" ? (
                   <>
-                    <Check size={13} strokeWidth={1.5} /> Copiado
+                    <Check size={13} strokeWidth={1.5} /> {t("combination.action.copied")}
                   </>
                 ) : (
                   <>
-                    <Send size={13} strokeWidth={1.5} /> Partilhar
+                    <Send size={13} strokeWidth={1.5} /> {t("combination.action.share")}
                   </>
                 )}
               </button>
@@ -1133,15 +1153,15 @@ function CombinationModal({
               >
                 {isPending ? (
                   <>
-                    <Loader2 size={13} strokeWidth={1.5} className="animate-spin" /> A guardar...
+                    <Loader2 size={13} strokeWidth={1.5} className="animate-spin" /> {t("combination.action.saving")}
                   </>
                 ) : savedOk ? (
                   <>
-                    <BookmarkCheck size={13} strokeWidth={1.5} /> Guardado
+                    <BookmarkCheck size={13} strokeWidth={1.5} /> {t("combination.action.saved")}
                   </>
                 ) : (
                   <>
-                    <BookmarkCheck size={13} strokeWidth={1.5} /> Guardar combinação
+                    <BookmarkCheck size={13} strokeWidth={1.5} /> {t("combination.action.saveResult")}
                   </>
                 )}
               </button>

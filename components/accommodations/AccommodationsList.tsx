@@ -148,12 +148,12 @@ function EmptyState({
     <div className="flex flex-col items-center justify-center rounded-[var(--radius-lg)] border border-dashed border-[var(--hairline-medium)] bg-surface-1 px-6 py-20 text-center">
       <Building2 size={32} strokeWidth={1.5} className="text-ink-subtle" />
       <p className="mt-4 text-base font-semibold text-ink">
-        {tab === "inactive" ? "Sem alojamentos inativos" : "Sem alojamentos ativos"}
+        {tab === "inactive" ? t("accommodations.empty.inactive") : t("accommodations.empty.active")}
       </p>
       <p className="mt-1 max-w-sm text-sm text-ink-subtle">
         {tab === "inactive"
-          ? "Alojamentos marcados como inativos aparecerão aqui."
-          : "Ainda não há nenhum imóvel registado. Adiciona o primeiro alojamento para começar a gerir a ocupação de camas."}
+          ? t("accommodations.empty.inactiveSub")
+          : t("accommodations.empty.activeSub")}
       </p>
       {isAdmin && tab === "active" && (
         <button
@@ -161,7 +161,7 @@ function EmptyState({
           className="mt-6 flex items-center gap-2 rounded-[var(--radius-md)] bg-orange-500 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-orange-400 active:scale-[0.99] cursor-pointer"
         >
           <Plus size={16} strokeWidth={2} />
-          Adicionar alojamento
+          {t("accommodations.empty.add")}
         </button>
       )}
     </div>
@@ -176,6 +176,7 @@ export function AddAccommodationButton({
   isAdmin: boolean;
   contacts?: { id: string; name: string }[];
 }) {
+  const { t } = useI18n();
   const [showForm, setShowForm] = useState(false);
 
   if (!isAdmin) return null;
@@ -187,7 +188,7 @@ export function AddAccommodationButton({
         className="flex items-center gap-2 rounded-[var(--radius-md)] bg-orange-500 px-3.5 py-2 text-sm font-medium text-white transition-all duration-150 hover:bg-orange-400 active:scale-[0.99] cursor-pointer"
       >
         <Plus size={16} strokeWidth={2} />
-        Adicionar Alojamento
+        {t("accommodations.form.title")}
       </button>
 
       {showForm && (

@@ -50,7 +50,7 @@ export function AddAccommodationForm({
         }
       } catch (err) {
         setError(
-          err instanceof Error ? err.message : "Erro ao guardar. Tenta novamente."
+          err instanceof Error ? err.message : t("state.saveFailed")
         );
       }
     });
@@ -61,7 +61,7 @@ export function AddAccommodationForm({
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
       role="dialog"
       aria-modal="true"
-      aria-label="Adicionar alojamento"
+      aria-labelledby="add-accommodation-title"
     >
       {/* Overlay */}
       <div
@@ -83,8 +83,8 @@ export function AddAccommodationForm({
             <div className="flex h-8 w-8 items-center justify-center rounded-[var(--radius-sm)] bg-[var(--orange-soft)]">
               <Building2 size={16} strokeWidth={1.5} className="text-orange-400" />
             </div>
-            <h2 className="text-base font-semibold text-ink">
-              Adicionar Alojamento
+            <h2 id="add-accommodation-title" className="text-base font-semibold text-ink">
+              {t("accommodations.form.title")}
             </h2>
           </div>
           <button
@@ -123,7 +123,7 @@ export function AddAccommodationForm({
         <form
           ref={formRef}
           onSubmit={handleSubmit}
-          className="max-h-[65vh] overflow-y-auto px-6 py-5"
+          className="max-h-[85vh] overflow-y-auto px-6 py-5"
         >
           {/* Hidden: status */}
           <input
@@ -174,10 +174,10 @@ export function AddAccommodationForm({
                         {t("action.cancel")}
                       </button>
                     </div>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                       <div>
                         <label htmlFor="aaf-new-contact-name" className={labelClass}>
-                          Nome <span className="text-red-400">*</span>
+                          {t("accommodations.form.newContactName")} <span className="text-red-400">*</span>
                         </label>
                         <input
                           id="aaf-new-contact-name"
@@ -189,7 +189,7 @@ export function AddAccommodationForm({
                       </div>
                       <div>
                         <label htmlFor="aaf-new-contact-phone" className={labelClass}>
-                          Telefone
+                          {t("accommodations.form.newContactPhone")}
                         </label>
                         <input
                           id="aaf-new-contact-phone"
@@ -208,7 +208,7 @@ export function AddAccommodationForm({
             {/* Endereço */}
             <div>
               <label htmlFor="aaf-address" className={labelClass}>
-                Endereço <span className="text-red-400">*</span>
+                {t("accommodations.field.address")} <span className="text-red-400">*</span>
               </label>
               <input
                 id="aaf-address"
@@ -222,7 +222,7 @@ export function AddAccommodationForm({
             {/* Cidade */}
             <div>
               <label htmlFor="aaf-city" className={labelClass}>
-                Cidade
+                {t("accommodations.field.city")}
               </label>
               <input
                 id="aaf-city"
@@ -233,25 +233,26 @@ export function AddAccommodationForm({
             </div>
 
             {/* Nº camas + Renda */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div>
                 <label htmlFor="aaf-total-beds" className={labelClass}>
-                  Nº de camas <span className="text-red-400">*</span>
+                  {t("accommodations.field.beds")} <span className="text-red-400">*</span>
                 </label>
                 <input
                   id="aaf-total-beds"
                   name="total_beds"
                   type="number"
                   min="1"
+                  step="1"
                   required
                   placeholder="4"
-                  inputMode="decimal"
+                  inputMode="numeric"
                   className={cn(inputClass, "tabular")}
                 />
               </div>
               <div>
                 <label htmlFor="aaf-monthly-rent" className={labelClass}>
-                  Renda mensal (€)
+                  {t("accommodations.field.rent")}
                 </label>
                 <input
                   id="aaf-monthly-rent"
@@ -267,10 +268,11 @@ export function AddAccommodationForm({
             </div>
 
             {/* Honorário + Calção */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div>
-                <label htmlFor="aaf-honorarium" className={labelClass}>
-                  {t("accommodations.field.honorarium")}
+                <label htmlFor="aaf-honorarium" className={labelClass} title={t("tooltip.honorarium")}>
+                  {t("accommodations.field.honorarium")}{" "}
+                  <span aria-hidden="true" className="cursor-help text-red-400">❌</span>
                 </label>
                 <input
                   id="aaf-honorarium"
@@ -282,10 +284,14 @@ export function AddAccommodationForm({
                   inputMode="decimal"
                   className={cn(inputClass, "tabular")}
                 />
+                <span className="mt-0.5 block text-[11px] text-ink-subtle">
+                  ❌ {t("tooltip.honorarium")}
+                </span>
               </div>
               <div>
-                <label htmlFor="aaf-deposit" className={labelClass}>
-                  {t("accommodations.field.deposit")}
+                <label htmlFor="aaf-deposit" className={labelClass} title={t("tooltip.deposit")}>
+                  {t("accommodations.field.deposit")}{" "}
+                  <span aria-hidden="true" className="cursor-help text-green-400">✅</span>
                 </label>
                 <input
                   id="aaf-deposit"
@@ -297,13 +303,16 @@ export function AddAccommodationForm({
                   inputMode="decimal"
                   className={cn(inputClass, "tabular")}
                 />
+                <span className="mt-0.5 block text-[11px] text-ink-subtle">
+                  ✅ {t("tooltip.deposit")}
+                </span>
               </div>
             </div>
 
             {/* Obra */}
             <div>
               <label htmlFor="aaf-obra-name" className={labelClass}>
-                Obra associada
+                {t("accommodations.field.obra")}
               </label>
               <input
                 id="aaf-obra-name"
@@ -314,10 +323,10 @@ export function AddAccommodationForm({
             </div>
 
             {/* Datas de contrato */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div>
                 <label htmlFor="aaf-contract-start" className={labelClass}>
-                  Início do contrato
+                  {t("accommodations.field.contractStart")}
                 </label>
                 <input
                   id="aaf-contract-start"
@@ -328,7 +337,7 @@ export function AddAccommodationForm({
               </div>
               <div>
                 <label htmlFor="aaf-contract-end" className={labelClass}>
-                  Fim do contrato
+                  {t("accommodations.field.contractEnd")}
                 </label>
                 <input
                   id="aaf-contract-end"
@@ -340,10 +349,10 @@ export function AddAccommodationForm({
             </div>
 
             {/* Proprietário + telefone */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div>
                 <label htmlFor="aaf-owner-name" className={labelClass}>
-                  Proprietário
+                  {t("accommodations.field.owner")}
                 </label>
                 <input
                   id="aaf-owner-name"
@@ -354,7 +363,7 @@ export function AddAccommodationForm({
               </div>
               <div>
                 <label htmlFor="aaf-owner-phone" className={labelClass}>
-                  Telefone
+                  {t("accommodations.field.phone")}
                 </label>
                 <input
                   id="aaf-owner-phone"
@@ -370,12 +379,12 @@ export function AddAccommodationForm({
             <div>
               <fieldset className="border-none p-0 m-0">
                 <legend className="mb-1.5 text-xs font-medium text-ink-muted">
-                  Mobilado?
+                  {t("accommodations.field.furnished")}
                 </legend>
                 <div className="flex gap-3">
                   {[
-                    { value: "true", label: "Sim", id: "aaf-furnished-yes" },
-                    { value: "false", label: "Não (precisa mobilar)", id: "aaf-furnished-no" },
+                    { value: "true", label: t("accommodations.field.furnished.yes"), id: "aaf-furnished-yes" },
+                    { value: "false", label: t("accommodations.field.furnished.no"), id: "aaf-furnished-no" },
                   ].map((opt) => (
                     <label
                       key={opt.value}
@@ -400,7 +409,7 @@ export function AddAccommodationForm({
             {/* Notas */}
             <div>
               <label htmlFor="aaf-notes" className={labelClass}>
-                Notas
+                {t("accommodations.field.notes")}
               </label>
               <textarea
                 id="aaf-notes"

@@ -171,10 +171,10 @@ export function AccommodationCard({
               ) : vacantCount > 0 ? (
                 <StatusBadge
                   variant="available"
-                  label={`${vacantCount} ${vacantCount === 1 ? "vaga" : "vagas"}`}
+                  label={`${vacantCount} ${t("accommodations.card.beds.vacant")}`}
                 />
               ) : (
-                <StatusBadge variant="occupied" label="Cheio" />
+                <StatusBadge variant="occupied" label={t("accommodations.card.full")} />
               )}
               {showFurnishBadge && <StatusBadge variant="furnish" />}
             </div>
@@ -187,7 +187,7 @@ export function AccommodationCard({
                 <p className="tabular text-lg font-bold text-ink leading-none">
                   {accommodation.total_beds}
                 </p>
-                <p className="text-[10px] text-ink-subtle mt-0.5">total</p>
+                <p className="text-[10px] text-ink-subtle mt-0.5">{t("accommodations.card.beds.total")}</p>
               </div>
               {!isExternal && (
                 <>
@@ -195,7 +195,7 @@ export function AccommodationCard({
                     <p className="tabular text-lg font-bold text-red-400 leading-none">
                       {occupiedCount}
                     </p>
-                    <p className="text-[10px] text-ink-subtle mt-0.5">ocup.</p>
+                    <p className="text-[10px] text-ink-subtle mt-0.5">{t("accommodations.card.beds.occupied")}</p>
                   </div>
                   <div className="text-center">
                     <p
@@ -206,7 +206,7 @@ export function AccommodationCard({
                     >
                       {vacantCount}
                     </p>
-                    <p className="text-[10px] text-ink-subtle mt-0.5">vagas</p>
+                    <p className="text-[10px] text-ink-subtle mt-0.5">{t("accommodations.card.beds.vacant")}</p>
                   </div>
                 </>
               )}
@@ -225,7 +225,7 @@ export function AccommodationCard({
         <div className="mt-4 grid grid-cols-2 gap-x-6 gap-y-2 sm:grid-cols-4">
           <div>
             <p className="text-[10px] uppercase tracking-wider text-ink-subtle">
-              Renda
+              {t("accommodations.card.rent")}
             </p>
             <p className="tabular text-sm font-medium text-ink">
               {formatEuro(accommodation.monthly_rent)}
@@ -234,7 +234,7 @@ export function AccommodationCard({
           {!isExternal && (
             <div>
               <p className="text-[10px] uppercase tracking-wider text-ink-subtle">
-                Custo/pessoa
+                {t("accommodations.card.costPP")}
               </p>
               <p className="tabular text-sm font-medium text-ink">
                 {formatEuro(costPP)}
@@ -263,7 +263,7 @@ export function AccommodationCard({
           )}
           <div>
             <p className="text-[10px] uppercase tracking-wider text-ink-subtle">
-              Proprietário
+              {t("accommodations.card.owner")}
             </p>
             <p className="text-sm font-medium text-ink truncate">
               {accommodation.owner_name ?? "—"}
@@ -281,7 +281,7 @@ export function AccommodationCard({
           </div>
           <div>
             <p className="text-[10px] uppercase tracking-wider text-ink-subtle">
-              Contrato
+              {t("accommodations.card.contract")}
             </p>
             <p className="text-sm text-ink">
               {formatDate(accommodation.contract_start)}
@@ -300,7 +300,7 @@ export function AccommodationCard({
           <div className="mb-3 flex items-center justify-between">
             <h4 className="flex items-center gap-2 text-sm font-semibold text-ink">
               <BedDouble size={16} strokeWidth={1.5} className="text-ink-subtle" />
-              Grelha de camas
+              {t("accommodations.card.bedGrid")}
             </h4>
             {isAdmin && !confirmDelete && (
               <div className="flex items-center gap-3">
@@ -314,10 +314,10 @@ export function AccommodationCard({
                     }}
                     disabled={isStatusChanging}
                     className="flex items-center gap-1 text-xs text-ink-subtle transition-colors hover:text-amber-400 cursor-pointer disabled:opacity-50"
-                    aria-label={isInactive ? "Reativar alojamento" : "Inativar alojamento"}
+                    aria-label={isInactive ? t("accommodations.card.reactivate") : t("accommodations.card.deactivate")}
                   >
                     {isStatusChanging && <Loader2 size={12} className="animate-spin" />}
-                    {isInactive ? "Reativar" : "Inativar"}
+                    {isInactive ? t("accommodations.card.reactivate") : t("accommodations.card.deactivate")}
                   </button>
                 )}
                 <button
@@ -325,16 +325,17 @@ export function AccommodationCard({
                     e.stopPropagation();
                     setConfirmDelete(true);
                   }}
+                  aria-label={t("accommodations.card.remove")}
                   className="flex items-center gap-1 text-xs text-ink-subtle transition-colors hover:text-red-400 cursor-pointer"
                 >
                   <Trash2 size={13} strokeWidth={1.5} />
-                  Remover alojamento
+                  {t("accommodations.card.remove")}
                 </button>
               </div>
             )}
             {isAdmin && confirmDelete && (
               <div className="flex items-center gap-2">
-                <span className="text-xs text-ink-muted">Tens a certeza?</span>
+                <span className="text-xs text-ink-muted">{t("accommodations.card.confirmDelete")}</span>
                 <button
                   onClick={handleDelete}
                   disabled={isDeleting}
@@ -343,13 +344,13 @@ export function AccommodationCard({
                   {isDeleting && (
                     <Loader2 size={12} className="animate-spin" />
                   )}
-                  Confirmar
+                  {t("action.confirm")}
                 </button>
                 <button
                   onClick={() => setConfirmDelete(false)}
                   className="text-xs text-ink-subtle hover:text-ink cursor-pointer"
                 >
-                  Cancelar
+                  {t("action.cancel")}
                 </button>
               </div>
             )}
@@ -382,7 +383,7 @@ export function AccommodationCard({
           {accommodation.notes && (
             <div className="mt-4 rounded-[var(--radius-sm)] border border-[var(--hairline)] bg-surface-3 px-4 py-3">
               <p className="text-[10px] uppercase tracking-wider text-ink-subtle mb-1">
-                Notas
+                {t("accommodations.card.notes")}
               </p>
               <p className="text-sm text-ink-muted">{accommodation.notes}</p>
             </div>

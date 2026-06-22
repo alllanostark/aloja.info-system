@@ -47,6 +47,7 @@ export type TranslationKey =
   | "state.loading"
   | "state.empty"
   | "state.error"
+  | "state.saveFailed"
   // Toggle de idioma
   | "lang.label"
   // Accommodations — tabs
@@ -123,7 +124,95 @@ export type TranslationKey =
   // Tooltips
   | "tooltip.honorarium"
   | "tooltip.deposit"
-  | "tooltip.finalPrice";
+  | "tooltip.finalPrice"
+  // Accommodations — form fields
+  | "accommodations.form.title"
+  | "accommodations.form.newContactName"
+  | "accommodations.form.newContactPhone"
+  | "accommodations.field.address"
+  | "accommodations.field.city"
+  | "accommodations.field.beds"
+  | "accommodations.field.rent"
+  | "accommodations.field.obra"
+  | "accommodations.field.contractStart"
+  | "accommodations.field.contractEnd"
+  | "accommodations.field.owner"
+  | "accommodations.field.phone"
+  | "accommodations.field.furnished"
+  | "accommodations.field.furnished.yes"
+  | "accommodations.field.furnished.no"
+  | "accommodations.field.notes"
+  // Accommodations — card labels
+  | "accommodations.card.rent"
+  | "accommodations.card.costPP"
+  | "accommodations.card.owner"
+  | "accommodations.card.contract"
+  | "accommodations.card.bedGrid"
+  | "accommodations.card.notes"
+  | "accommodations.card.full"
+  | "accommodations.card.deactivate"
+  | "accommodations.card.reactivate"
+  | "accommodations.card.remove"
+  | "accommodations.card.confirmDelete"
+  | "accommodations.card.beds.total"
+  | "accommodations.card.beds.occupied"
+  | "accommodations.card.beds.vacant"
+  // Accommodations — empty states
+  | "accommodations.empty.active"
+  | "accommodations.empty.activeSub"
+  | "accommodations.empty.inactive"
+  | "accommodations.empty.inactiveSub"
+  | "accommodations.empty.add"
+  // Contacts — toolbar
+  | "contacts.city.placeholder"
+  | "contacts.city.all"
+  | "contacts.add"
+  | "contacts.cancel"
+  // Contacts — rating labels
+  | "contacts.rating.all"
+  | "contacts.rating.good"
+  | "contacts.rating.neutral"
+  | "contacts.rating.bad"
+  // Contacts — card
+  | "contacts.lastUsed"
+  | "contacts.neverUsed"
+  | "contacts.deleteConfirm"
+  | "contacts.cancelDelete"
+  // Contacts — empty states
+  | "contacts.empty.title"
+  | "contacts.empty.sub"
+  | "contacts.filtered.empty"
+  // Combination — card summary
+  | "combination.card.properties"
+  | "combination.card.withinBudget"
+  | "combination.card.above"
+  | "combination.card.furnish"
+  | "combination.card.hint"
+  | "combination.card.costPerMonth"
+  | "combination.card.negotiated"
+  | "combination.card.costDistribution"
+  | "combination.card.perMonth"
+  // Combination — duration selector
+  | "combination.duration.label"
+  | "combination.duration.months"
+  | "combination.duration.weeks"
+  | "combination.duration.days"
+  // Combination — note
+  | "combination.note.label"
+  | "combination.note.placeholder"
+  // Combination — footer actions
+  | "combination.action.share"
+  | "combination.action.copied"
+  | "combination.action.saving"
+  | "combination.action.saved"
+  | "combination.action.saveResult"
+  // Combination — furnish badge
+  | "combination.furnish"
+  // History — combination card
+  | "history.combination.netCost"
+  | "history.combination.property"
+  | "history.combination.properties"
+  | "history.combination.deleteConfirm";
 
 type Dictionary = Record<TranslationKey, string>;
 
@@ -157,6 +246,7 @@ const dictionaries: Record<Locale, Dictionary> = {
     "state.loading": "A carregar...",
     "state.empty": "Sem resultados",
     "state.error": "Erro ao carregar",
+    "state.saveFailed": "Erro ao guardar. Tenta novamente.",
     "lang.label": "Idioma",
     "accommodations.tabs.active": "Ativos",
     "accommodations.tabs.inactive": "Inativos",
@@ -221,6 +311,81 @@ const dictionaries: Record<Locale, Dictionary> = {
     "tooltip.honorarium": "Pago uma vez. Não volta.",
     "tooltip.deposit": "Pago no início. Volta no fim do contrato.",
     "tooltip.finalPrice": "Sobrescreve a mensalidade. Para casos de barganha.",
+    "accommodations.form.title": "Adicionar Alojamento",
+    "accommodations.form.newContactName": "Nome",
+    "accommodations.form.newContactPhone": "Telefone",
+    "accommodations.field.address": "Endereço",
+    "accommodations.field.city": "Cidade",
+    "accommodations.field.beds": "Nº de camas",
+    "accommodations.field.rent": "Renda mensal (€)",
+    "accommodations.field.obra": "Obra associada",
+    "accommodations.field.contractStart": "Início do contrato",
+    "accommodations.field.contractEnd": "Fim do contrato",
+    "accommodations.field.owner": "Proprietário",
+    "accommodations.field.phone": "Telefone",
+    "accommodations.field.furnished": "Mobilado?",
+    "accommodations.field.furnished.yes": "Sim",
+    "accommodations.field.furnished.no": "Não (precisa mobilar)",
+    "accommodations.field.notes": "Notas",
+    "accommodations.card.rent": "Renda",
+    "accommodations.card.costPP": "Custo/pessoa",
+    "accommodations.card.owner": "Proprietário",
+    "accommodations.card.contract": "Contrato",
+    "accommodations.card.bedGrid": "Grelha de camas",
+    "accommodations.card.notes": "Notas",
+    "accommodations.card.full": "Cheio",
+    "accommodations.card.deactivate": "Inativar",
+    "accommodations.card.reactivate": "Reativar",
+    "accommodations.card.remove": "Remover alojamento",
+    "accommodations.card.confirmDelete": "Tens a certeza?",
+    "accommodations.card.beds.total": "total",
+    "accommodations.card.beds.occupied": "ocup.",
+    "accommodations.card.beds.vacant": "vagas",
+    "accommodations.empty.active": "Sem alojamentos ativos",
+    "accommodations.empty.activeSub": "Ainda não há nenhum imóvel registado. Adiciona o primeiro alojamento para começar a gerir a ocupação de camas.",
+    "accommodations.empty.inactive": "Sem alojamentos inativos",
+    "accommodations.empty.inactiveSub": "Alojamentos marcados como inativos aparecerão aqui.",
+    "accommodations.empty.add": "Adicionar alojamento",
+    "contacts.city.placeholder": "Filtrar por cidade…",
+    "contacts.city.all": "Todas as cidades",
+    "contacts.add": "Adicionar Contacto",
+    "contacts.cancel": "Cancelar",
+    "contacts.rating.all": "Todos",
+    "contacts.rating.good": "Bons",
+    "contacts.rating.neutral": "Neutros",
+    "contacts.rating.bad": "Maus",
+    "contacts.lastUsed": "Último uso:",
+    "contacts.neverUsed": "Nunca utilizado",
+    "contacts.deleteConfirm": "Clica novamente para confirmar",
+    "contacts.cancelDelete": "Cancelar eliminação",
+    "contacts.empty.title": "Sem contactos na base de dados",
+    "contacts.empty.sub": "Adiciona proprietários e agências para os encontrares facilmente em buscas futuras.",
+    "contacts.filtered.empty": "Nenhum contacto corresponde aos filtros.",
+    "combination.card.properties": "imóveis",
+    "combination.card.withinBudget": "No orçamento",
+    "combination.card.above": "Acima",
+    "combination.card.furnish": "mobilar",
+    "combination.card.hint": "Clica para detalhes e simulação de estadia",
+    "combination.card.costPerMonth": "Custo líquido/mês",
+    "combination.card.negotiated": "negociado",
+    "combination.card.costDistribution": "Distribuição de custo por imóvel",
+    "combination.card.perMonth": "/mês",
+    "combination.duration.label": "Duração da estadia",
+    "combination.duration.months": "Meses",
+    "combination.duration.weeks": "Semanas",
+    "combination.duration.days": "Dias",
+    "combination.note.label": "Nota",
+    "combination.note.placeholder": "Notas sobre esta combinação...",
+    "combination.action.share": "Partilhar",
+    "combination.action.copied": "Copiado",
+    "combination.action.saving": "A guardar...",
+    "combination.action.saved": "Guardado",
+    "combination.action.saveResult": "Guardar combinação",
+    "combination.furnish": "Precisa Mobilar",
+    "history.combination.netCost": "Custo líquido",
+    "history.combination.property": "imóvel",
+    "history.combination.properties": "imóveis",
+    "history.combination.deleteConfirm": "Confirmar",
   },
   es: {
     "nav.section": "Operación",
@@ -249,6 +414,7 @@ const dictionaries: Record<Locale, Dictionary> = {
     "state.loading": "Cargando...",
     "state.empty": "Sin resultados",
     "state.error": "Error al cargar",
+    "state.saveFailed": "Error al guardar. Inténtalo de nuevo.",
     "lang.label": "Idioma",
     "accommodations.tabs.active": "Activos",
     "accommodations.tabs.inactive": "Inactivos",
@@ -313,6 +479,81 @@ const dictionaries: Record<Locale, Dictionary> = {
     "tooltip.honorarium": "Pago una vez. No vuelve.",
     "tooltip.deposit": "Pago al inicio. Vuelve al final del contrato.",
     "tooltip.finalPrice": "Sustituye la mensualidad. Para casos de negociación.",
+    "accommodations.form.title": "Añadir Alojamiento",
+    "accommodations.form.newContactName": "Nombre",
+    "accommodations.form.newContactPhone": "Teléfono",
+    "accommodations.field.address": "Dirección",
+    "accommodations.field.city": "Ciudad",
+    "accommodations.field.beds": "Nº de camas",
+    "accommodations.field.rent": "Alquiler mensual (€)",
+    "accommodations.field.obra": "Obra asociada",
+    "accommodations.field.contractStart": "Inicio del contrato",
+    "accommodations.field.contractEnd": "Fin del contrato",
+    "accommodations.field.owner": "Propietario",
+    "accommodations.field.phone": "Teléfono",
+    "accommodations.field.furnished": "¿Amueblado?",
+    "accommodations.field.furnished.yes": "Sí",
+    "accommodations.field.furnished.no": "No (necesita amueblarse)",
+    "accommodations.field.notes": "Notas",
+    "accommodations.card.rent": "Alquiler",
+    "accommodations.card.costPP": "Coste/persona",
+    "accommodations.card.owner": "Propietario",
+    "accommodations.card.contract": "Contrato",
+    "accommodations.card.bedGrid": "Cuadrícula de camas",
+    "accommodations.card.notes": "Notas",
+    "accommodations.card.full": "Lleno",
+    "accommodations.card.deactivate": "Desactivar",
+    "accommodations.card.reactivate": "Reactivar",
+    "accommodations.card.remove": "Eliminar alojamiento",
+    "accommodations.card.confirmDelete": "¿Estás seguro?",
+    "accommodations.card.beds.total": "total",
+    "accommodations.card.beds.occupied": "ocup.",
+    "accommodations.card.beds.vacant": "libres",
+    "accommodations.empty.active": "Sin alojamientos activos",
+    "accommodations.empty.activeSub": "Aún no hay ningún inmueble registrado. Añade el primer alojamiento para empezar a gestionar la ocupación de camas.",
+    "accommodations.empty.inactive": "Sin alojamientos inactivos",
+    "accommodations.empty.inactiveSub": "Los alojamientos marcados como inactivos aparecerán aquí.",
+    "accommodations.empty.add": "Añadir alojamiento",
+    "contacts.city.placeholder": "Filtrar por ciudad…",
+    "contacts.city.all": "Todas las ciudades",
+    "contacts.add": "Añadir Contacto",
+    "contacts.cancel": "Cancelar",
+    "contacts.rating.all": "Todos",
+    "contacts.rating.good": "Buenos",
+    "contacts.rating.neutral": "Neutros",
+    "contacts.rating.bad": "Malos",
+    "contacts.lastUsed": "Último uso:",
+    "contacts.neverUsed": "Nunca utilizado",
+    "contacts.deleteConfirm": "Haz clic de nuevo para confirmar",
+    "contacts.cancelDelete": "Cancelar eliminación",
+    "contacts.empty.title": "Sin contactos en la base de datos",
+    "contacts.empty.sub": "Añade propietarios y agencias para encontrarlos fácilmente en búsquedas futuras.",
+    "contacts.filtered.empty": "Ningún contacto coincide con los filtros.",
+    "combination.card.properties": "inmuebles",
+    "combination.card.withinBudget": "Dentro del presupuesto",
+    "combination.card.above": "Por encima",
+    "combination.card.furnish": "amueblar",
+    "combination.card.hint": "Haz clic para detalles y simulación de estancia",
+    "combination.card.costPerMonth": "Coste neto/mes",
+    "combination.card.negotiated": "negociado",
+    "combination.card.costDistribution": "Distribución de coste por inmueble",
+    "combination.card.perMonth": "/mes",
+    "combination.duration.label": "Duración de la estancia",
+    "combination.duration.months": "Meses",
+    "combination.duration.weeks": "Semanas",
+    "combination.duration.days": "Días",
+    "combination.note.label": "Nota",
+    "combination.note.placeholder": "Notas sobre esta combinación...",
+    "combination.action.share": "Compartir",
+    "combination.action.copied": "Copiado",
+    "combination.action.saving": "Guardando...",
+    "combination.action.saved": "Guardado",
+    "combination.action.saveResult": "Guardar combinación",
+    "combination.furnish": "Necesita Amueblarse",
+    "history.combination.netCost": "Coste neto",
+    "history.combination.property": "inmueble",
+    "history.combination.properties": "inmuebles",
+    "history.combination.deleteConfirm": "Confirmar",
   },
 };
 

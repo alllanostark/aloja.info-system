@@ -9,12 +9,7 @@ import { AddContactForm } from "./AddContactForm";
 import { ImportAgenciesButton } from "./ImportAgenciesButton";
 import type { Contact, ContactRating } from "@/types";
 
-const RATING_FILTERS: { value: "all" | ContactRating; label: string }[] = [
-  { value: "all", label: "Todos" },
-  { value: "good", label: "Bons" },
-  { value: "neutral", label: "Neutros" },
-  { value: "bad", label: "Maus" },
-];
+// RATING_FILTERS agora é gerado dentro do componente via t()
 
 function stripDigits(s: string) {
   return s.replace(/\D/g, "");
@@ -32,6 +27,14 @@ export function ContactsList({
   highlightId?: string;
 }) {
   const { t } = useI18n();
+
+  const ratingFilters: { value: "all" | ContactRating; label: string }[] = [
+    { value: "all", label: t("contacts.rating.all") },
+    { value: "good", label: t("contacts.rating.good") },
+    { value: "neutral", label: t("contacts.rating.neutral") },
+    { value: "bad", label: t("contacts.rating.bad") },
+  ];
+
   const [ratingFilter, setRatingFilter] = useState<"all" | ContactRating>("all");
   const [cityQuery, setCityQuery] = useState("");
   const [searchInput, setSearchInput] = useState("");
@@ -123,8 +126,8 @@ export function ContactsList({
                 type="text"
                 value={cityQuery}
                 onChange={(e) => setCityQuery(e.target.value)}
-                placeholder="Filtrar por cidade…"
-                aria-label="Filtrar por cidade"
+                placeholder={t("contacts.city.placeholder")}
+                aria-label={t("contacts.city.placeholder")}
                 className={cn(
                   "w-full rounded-[var(--radius-md)] border border-[var(--hairline)] bg-surface-2",
                   "py-2.5 pl-8 pr-4 text-sm text-ink placeholder:text-ink-subtle",
@@ -143,14 +146,14 @@ export function ContactsList({
               <select
                 value={cityQuery}
                 onChange={(e) => setCityQuery(e.target.value)}
-                aria-label="Filtrar por cidade"
+                aria-label={t("contacts.city.placeholder")}
                 className={cn(
                   "w-full cursor-pointer rounded-[var(--radius-md)] border border-[var(--hairline)] bg-surface-2",
                   "py-2.5 pl-8 pr-4 text-sm text-ink",
                   "focus:border-[var(--hairline-medium)] focus:outline-none transition-colors"
                 )}
               >
-                <option value="">Todas as cidades</option>
+                <option value="">{t("contacts.city.all")}</option>
                 {cities.map((city) => (
                   <option key={city} value={city}>
                     {city}
@@ -177,7 +180,7 @@ export function ContactsList({
               )}
             >
               <Plus size={16} strokeWidth={2} />
-              {showForm ? "Cancelar" : "Adicionar Contacto"}
+              {showForm ? t("contacts.cancel") : t("contacts.add")}
             </button>
           </>
         )}
@@ -185,7 +188,7 @@ export function ContactsList({
 
       {/* Toolbar linha 2 — chips de rating */}
       <div className="flex items-center gap-1 rounded-[var(--radius-md)] border border-[var(--hairline)] bg-surface-2 p-1 w-fit">
-        {RATING_FILTERS.map((opt) => (
+        {ratingFilters.map((opt) => (
           <button
             key={opt.value}
             onClick={() => setRatingFilter(opt.value)}
@@ -211,17 +214,17 @@ export function ContactsList({
         <div className="flex flex-col items-center justify-center rounded-[var(--radius-lg)] border border-dashed border-[var(--hairline-medium)] bg-surface-1 px-6 py-16 text-center">
           <UsersRound size={28} strokeWidth={1.5} className="text-ink-subtle" />
           <p className="mt-3 text-sm font-medium text-ink-muted">
-            Sem contactos na base de dados
+            {t("contacts.empty.title")}
           </p>
           <p className="mt-1 text-sm text-ink-subtle">
-            Adiciona proprietários e agências para os encontrares facilmente em buscas futuras.
+            {t("contacts.empty.sub")}
           </p>
         </div>
       ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-[var(--radius-lg)] border border-dashed border-[var(--hairline-medium)] bg-surface-1 px-6 py-12 text-center">
           <UsersRound size={24} strokeWidth={1.5} className="text-ink-subtle" />
           <p className="mt-3 text-sm text-ink-muted">
-            Nenhum contacto corresponde aos filtros.
+            {t("contacts.filtered.empty")}
           </p>
         </div>
       ) : (

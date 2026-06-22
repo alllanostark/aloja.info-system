@@ -95,7 +95,7 @@ function PickerCard({
         </span>
         {!item.furnished && (
           <span className="rounded-[var(--radius-pill)] border border-[var(--yellow-border)] bg-[var(--yellow-soft)] px-2 py-0.5 text-[10px] font-medium text-yellow-400">
-            Precisa Mobilar
+            {t("combination.furnish")}
           </span>
         )}
       </div>
@@ -227,10 +227,10 @@ export function PropertyPicker({
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-center justify-center p-4"
+      className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center sm:p-4"
       role="dialog"
       aria-modal="true"
-      aria-label={t("combination.picker.title")}
+      aria-labelledby="picker-title"
     >
       <div
         onClick={onClose}
@@ -239,11 +239,11 @@ export function PropertyPicker({
 
       <div
         ref={panelRef}
-        className="relative z-10 flex max-h-[85vh] w-full max-w-4xl flex-col overflow-hidden rounded-[var(--radius-xl)] border border-[var(--hairline-medium)] bg-surface-2"
+        className="relative z-10 flex h-[100dvh] w-full flex-col overflow-hidden sm:h-auto sm:max-h-[85vh] sm:max-w-4xl sm:rounded-[var(--radius-xl)] border border-[var(--hairline-medium)] bg-surface-2 rounded-t-[var(--radius-xl)]"
       >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-[var(--hairline)] px-5 py-4">
-          <p className="text-sm font-semibold text-ink">
+          <p id="picker-title" className="text-sm font-semibold text-ink">
             {t("combination.picker.title")}
           </p>
           <button
@@ -285,6 +285,7 @@ export function PropertyPicker({
             />
             <input
               type="text"
+              aria-label={t("combination.picker.search")}
               placeholder={t("combination.picker.search")}
               value={query}
               onChange={(e) => setQuery(e.target.value)}

@@ -16,11 +16,6 @@ export interface CombinationSummary {
   durationUnit: "months" | "weeks" | "days";
 }
 
-function durationLabel(value: number, unit: "months" | "weeks" | "days"): string {
-  const suffix = unit === "months" ? "meses" : unit === "weeks" ? "semanas" : "dias";
-  return `${value} ${suffix}`;
-}
-
 function CombinationCard({
   combo,
   isAdmin,
@@ -28,6 +23,7 @@ function CombinationCard({
   combo: CombinationSummary;
   isAdmin: boolean;
 }) {
+  const { t } = useI18n();
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [isPending, startTransition] = useTransition();
 
@@ -52,7 +48,7 @@ function CombinationCard({
           <button
             onClick={handleDelete}
             disabled={isPending}
-            aria-label={confirmDelete ? "Confirmar eliminação" : "Eliminar composição"}
+            aria-label={confirmDelete ? t("history.combination.deleteConfirm") : t("action.delete")}
             className={cn(
               "flex shrink-0 items-center gap-1 rounded-[var(--radius-sm)] border px-2 py-1 text-[11px] font-medium transition-all disabled:cursor-not-allowed disabled:opacity-50",
               confirmDelete
@@ -61,7 +57,7 @@ function CombinationCard({
             )}
           >
             <Trash2 size={11} strokeWidth={1.5} />
-            {confirmDelete ? "Confirmar" : ""}
+            {confirmDelete ? t("history.combination.deleteConfirm") : ""}
           </button>
         )}
       </div>
@@ -74,13 +70,25 @@ function CombinationCard({
       )}
 
       <div className="mb-4 flex flex-wrap items-center gap-3 text-xs text-ink-muted">
-        <span>{combo.itemCount} {combo.itemCount === 1 ? "imóvel" : "imóveis"}</span>
+        <span>
+          {combo.itemCount}{" "}
+          {combo.itemCount === 1
+            ? t("history.combination.property")
+            : t("history.combination.properties")}
+        </span>
         <span className="text-[var(--hairline-medium)]">·</span>
-        <span>{durationLabel(combo.durationValue, combo.durationUnit)}</span>
+        <span>
+          {combo.durationValue}{" "}
+          {combo.durationUnit === "months"
+            ? t("combination.duration.months")
+            : combo.durationUnit === "weeks"
+              ? t("combination.duration.weeks")
+              : t("combination.duration.days")}
+        </span>
       </div>
 
       <div className="border-t border-[var(--hairline)] pt-3">
-        <p className="mb-0.5 text-[10px] uppercase tracking-wider text-ink-subtle">Custo líquido</p>
+        <p className="mb-0.5 text-[10px] uppercase tracking-wider text-ink-subtle">{t("history.combination.netCost")}</p>
         <p className="tabular text-lg font-bold text-ink">{formatEuro(combo.netCost)}</p>
       </div>
     </div>
