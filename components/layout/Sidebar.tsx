@@ -10,6 +10,7 @@ import {
   History,
   LogOut,
   Home,
+  UsersRound,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useI18n, type TranslationKey } from "@/lib/i18n";
@@ -19,6 +20,7 @@ const NAV: { href: string; key: TranslationKey; icon: React.ElementType }[] = [
   { href: "/dashboard", key: "nav.dashboard", icon: LayoutDashboard },
   { href: "/search", key: "nav.search", icon: Search },
   { href: "/accommodations", key: "nav.accommodations", icon: Building2 },
+  { href: "/contacts", key: "nav.contacts", icon: UsersRound },
   { href: "/history", key: "nav.history", icon: History },
 ];
 

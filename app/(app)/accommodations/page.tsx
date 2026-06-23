@@ -2,43 +2,61 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile, isAdmin } from "@/lib/auth";
 import { TopBar } from "@/components/layout/TopBar";
 import { AccommodationsList, AddAccommodationButton } from "@/components/accommodations/AccommodationsList";
-import type { ActiveAccommodation, BedOccupant } from "@/types";
+import type { ActiveAccommodation, BedOccupant, Contact } from "@/types";
 
 export const dynamic = "force-dynamic";
 
-export default async function AccommodationsPage() {
+export default async function AccommodationsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string; contact?: string }>;
+}) {
+  const { tab, contact } = await searchParams;
   const supabase = await createClient();
   const profile = await getCurrentProfile();
   const admin = isAdmin(profile);
 
-  const [{ data: accommodations }, { data: allOccupants }] = await Promise.all([
-    supabase
-      .from("active_accommodations")
-      .select("*")
-      .order("created_at", { ascending: false }),
-    supabase
-      .from("bed_occupants")
-      .select("*")
-      .is("exit_date", null),
-  ]);
+  const [{ data: accommodations }, { data: allOccupants }, { data: allContacts }] =
+    await Promise.all([
+      supabase
+        .from("active_accommodations")
+        .select("*")
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("bed_occupants")
+        .select("*")
+        .is("exit_date", null),
+      supabase
+        .from("contacts")
+        .select("id, name")
+        .order("name", { ascending: true }),
+    ]);
 
   const accs = (accommodations ?? []) as ActiveAccommodation[];
   const occupants = (allOccupants ?? []) as BedOccupant[];
+  const contacts = (allContacts ?? []) as Pick<Contact, "id" | "name">[];
+
+  // Mapa contact_id -> name para lookup rapido nos cards
+  const contactMap = new Map(contacts.map((c) => [c.id, c.name]));
 
   const items = accs.map((acc) => ({
     accommodation: acc,
     occupants: occupants.filter((o) => o.accommodation_id === acc.id),
+    contactName: acc.contact_id ? (contactMap.get(acc.contact_id) ?? null) : null,
   }));
 
-  const totalBeds = accs.reduce((sum, a) => sum + a.total_beds, 0);
-  const occupiedCount = occupants.length;
+  // Sumário restrito a alojamentos ocupáveis (status 'active')
+  const occupiable = accs.filter((a) => (a.status ?? "active") === "active");
+  const occupiableIds = new Set(occupiable.map((a) => a.id));
+  const totalBeds = occupiable.reduce((sum, a) => sum + a.total_beds, 0);
+  const occupiedCount = occupants.filter((o) => occupiableIds.has(o.accommodation_id)).length;
   const vacantCount = totalBeds - occupiedCount;
 
   return (
     <>
       <TopBar
-        title="Alojamentos Ativos"
-        action={<AddAccommodationButton isAdmin={admin} />}
+        title="Alojamentos"
+        action={<AddAccommodationButton isAdmin={admin} contacts={contacts} />}
       />
 
       <div className="mx-auto max-w-[1280px] px-8 py-8">
@@ -46,14 +64,14 @@ export default async function AccommodationsPage() {
         <div className="mb-8 flex items-end justify-between gap-4">
           <div>
             <h2 className="text-2xl font-semibold tracking-display text-ink">
-              Alojamentos Ativos
+              Alojamentos
             </h2>
             <p className="mt-1 text-sm text-ink-subtle">
               Gestão de ocupação por cama dos imóveis atualmente alugados.
             </p>
           </div>
 
-          {/* Sumário rápido */}
+          {/* Sumário rápido — totais gerais */}
           {accs.length > 0 && (
             <div className="flex shrink-0 items-center gap-5 rounded-[var(--radius-lg)] border border-[var(--hairline)] bg-surface-2 px-5 py-3">
               <div className="text-center">
@@ -93,8 +111,14 @@ export default async function AccommodationsPage() {
           )}
         </div>
 
-        {/* Lista de alojamentos */}
-        <AccommodationsList items={items} isAdmin={admin} />
+        {/* Lista de alojamentos com tabs */}
+        <AccommodationsList
+          items={items}
+          isAdmin={admin}
+          contacts={contacts}
+          initialTab={tab}
+          initialContactId={contact}
+        />
       </div>
     </>
   );

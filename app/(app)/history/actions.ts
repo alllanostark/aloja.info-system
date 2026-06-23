@@ -32,6 +32,7 @@ export async function addContact(formData: FormData) {
   if (error) return { error: error.message };
 
   revalidatePath("/history");
+  revalidatePath("/contacts");
 }
 
 export async function updateContactRating({
@@ -52,6 +53,7 @@ export async function updateContactRating({
   if (error) return { error: error.message };
 
   revalidatePath("/history");
+  revalidatePath("/contacts");
 }
 
 export async function deleteContact({ id }: { id: string }) {
@@ -63,4 +65,5 @@ export async function deleteContact({ id }: { id: string }) {
   if (error) return { error: error.message };
 
   revalidatePath("/history");
+  revalidatePath("/contacts");
 }

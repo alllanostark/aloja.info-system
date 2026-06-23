@@ -1,35 +1,80 @@
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile, isAdmin } from "@/lib/auth";
+import { redirect } from "next/navigation";
 import { TopBar } from "@/components/layout/TopBar";
 import { HistoryTabs } from "@/components/history/HistoryTabs";
-import type { Search, Contact } from "@/types";
+import { calculateFinancials } from "@/lib/combinations";
+import type { Search } from "@/types";
+import type { FinancialItemInput } from "@/lib/combinations";
+import type { CombinationSummary } from "@/components/history/CombinationsList";
 
 export const dynamic = "force-dynamic";
 
-export default async function HistoryPage() {
+export default async function HistoryPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string }>;
+}) {
+  const { tab } = await searchParams;
+
+  if (tab === "contacts") {
+    redirect("/contacts");
+  }
+
   const supabase = await createClient();
   const profile = await getCurrentProfile();
   const admin = isAdmin(profile);
 
-  const [{ data: searchesData }, { data: contactsData }] = await Promise.all([
-    supabase
-      .from("searches")
-      .select("*")
-      .order("created_at", { ascending: false }),
-    supabase
-      .from("contacts")
-      .select("*")
-      .order("last_used", { ascending: false, nullsFirst: false }),
-  ]);
+  const { data: searchesData } = await supabase
+    .from("searches")
+    .select("*")
+    .order("created_at", { ascending: false });
 
   const searches = (searchesData ?? []) as Search[];
-  const contacts = (contactsData ?? []) as Contact[];
 
   const stats = {
     total: searches.length,
     completed: searches.filter((s) => s.status === "completed").length,
     active: searches.filter((s) => s.status === "active").length,
   };
+
+  const { data: overridesData } = await supabase
+    .from("combination_overrides")
+    .select("*, combination_items(*), searches(obra_name, num_workers)")
+    .order("created_at", { ascending: false });
+
+  const combinations: CombinationSummary[] = (overridesData ?? []).map(
+    (ov: Record<string, unknown>) => {
+      const combinationItems = (ov.combination_items as Record<string, unknown>[] | null) ?? [];
+      const searchRow = ov.searches as { obra_name: string | null; num_workers: number } | null;
+      const workersNeeded = searchRow?.num_workers ?? 1;
+
+      const financialInputs: FinancialItemInput[] = combinationItems.map((it) => ({
+        beds: (it.override_beds as number | null) ?? 0,
+        driveMinutes: (it.override_drive_minutes as number | null) ?? null,
+        monthlyRent: (it.override_monthly_rent as number | null) ?? 0,
+        deposit: (it.override_deposit as number) ?? 0,
+        honorarium: (it.override_honorarium as number) ?? 0,
+        finalPrice: (it.override_final_price as number | null) ?? null,
+      }));
+
+      const fin = calculateFinancials(
+        financialInputs,
+        { value: ov.duration_value as number, unit: ov.duration_unit as "months" | "weeks" | "days" },
+        workersNeeded
+      );
+
+      return {
+        id: ov.id as string,
+        label: ov.label as string,
+        obraName: searchRow?.obra_name ?? null,
+        itemCount: combinationItems.length,
+        netCost: fin.netCost,
+        durationValue: ov.duration_value as number,
+        durationUnit: ov.duration_unit as "months" | "weeks" | "days",
+      };
+    }
+  );
 
   return (
     <>
@@ -41,15 +86,15 @@ export default async function HistoryPage() {
             Histórico
           </h2>
           <p className="mt-1 text-sm text-ink-subtle">
-            Buscas passadas e base de contactos de proprietários e agências.
+            Buscas passadas de alojamentos para obras.
           </p>
         </div>
 
         <HistoryTabs
           searches={searches}
-          contacts={contacts}
           isAdmin={admin}
           stats={stats}
+          combinations={combinations}
         />
       </div>
     </>

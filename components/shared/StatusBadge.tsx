@@ -6,7 +6,8 @@ type Variant =
   | "furnish"
   | "approved"
   | "rejected"
-  | "pending";
+  | "pending"
+  | "external";
 
 const VARIANTS: Record<
   Variant,
@@ -36,6 +37,10 @@ const VARIANTS: Record<
   pending: {
     label: "Pendente",
     className: "text-ink-muted bg-surface-4 border-[var(--hairline)]",
+  },
+  external: {
+    label: "Externo",
+    className: "text-orange-400 bg-[var(--orange-soft)] border-[var(--orange-border)]",
   },
 };
 

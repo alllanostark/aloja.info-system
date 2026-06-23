@@ -157,7 +157,9 @@ create table public.search_results (
   furnished        boolean           not null default true,
   images           jsonb             not null default '[]',
   raw_data         jsonb,
-  status           result_status     not null default 'new'
+  status           result_status     not null default 'new',
+  honorarium       numeric(10,2)     not null default 0,  -- onda 5
+  deposit          numeric(10,2)     not null default 0   -- onda 5
 );
 
 create index idx_results_search_id       on public.search_results(search_id);
@@ -233,15 +235,22 @@ create table public.active_accommodations (
   furnished       boolean       not null default true,
   obra_name       text,
   search_id       uuid          references public.searches(id) on delete set null,
+  contact_id      uuid          references public.contacts(id) on delete set null,  -- onda 5
   contract_start  date,
   contract_end    date,
   owner_name      text,
   owner_phone     text,
-  notes           text
+  notes           text,
+  status          text          not null default 'active'                            -- onda 5
+                                  check (status in ('active', 'inactive', 'external')),
+  honorarium      numeric(10,2) not null default 0,                                  -- onda 5
+  deposit         numeric(10,2) not null default 0                                   -- onda 5
 );
 
 create index idx_accommodations_search_id on public.active_accommodations(search_id);
 create index idx_accommodations_city      on public.active_accommodations(city);
+create index idx_accommodations_status    on public.active_accommodations(status);   -- onda 5
+create index idx_accommodations_contact   on public.active_accommodations(contact_id); -- onda 5
 
 create trigger trg_accommodations_updated_at
   before update on public.active_accommodations
@@ -372,6 +381,130 @@ create policy "Admin gere combinações"
       where p.id = auth.uid() and p.role = 'admin'
     )
   );
+
+-- ════════════════════════════════════════════════════════════════════════
+-- 9. COMBINATION_OVERRIDES + COMBINATION_ITEMS  (Onda 5: composições editáveis)
+-- ════════════════════════════════════════════════════════════════════════
+create table public.combination_overrides (
+  id             uuid        primary key default uuid_generate_v4(),
+  created_at     timestamptz not null default now(),
+  updated_at     timestamptz not null default now(),
+  search_id      uuid        not null references public.searches(id) on delete cascade,
+  label          text        not null,
+  duration_value int         not null default 1 check (duration_value > 0),
+  duration_unit  text        not null default 'months'
+                               check (duration_unit in ('months', 'weeks', 'days')),
+  notes          text
+);
+
+create index idx_combination_overrides_search on public.combination_overrides(search_id);
+
+create trigger trg_combination_overrides_updated
+  before update on public.combination_overrides
+  for each row execute function public.set_updated_at();
+
+alter table public.combination_overrides enable row level security;
+
+create policy "Autenticados leem composições"
+  on public.combination_overrides for select
+  using (auth.uid() is not null);
+
+create policy "Admin gere composições"
+  on public.combination_overrides for all
+  using (
+    exists (
+      select 1 from public.profiles p
+      where p.id = auth.uid() and p.role = 'admin'
+    )
+  );
+
+-- ────────────────────────────────────────────────────────────────────────────
+
+create table public.combination_items (
+  id                     uuid          primary key default uuid_generate_v4(),
+  created_at             timestamptz   not null default now(),
+  combination_id         uuid          not null
+                           references public.combination_overrides(id) on delete cascade,
+  source_type            text          not null
+                           check (source_type in ('search', 'active', 'external', 'discarded', 'manual')),
+  source_id              uuid,
+  override_title         text,
+  override_beds          int,
+  override_drive_minutes int,
+  override_monthly_rent  numeric(10,2),
+  override_deposit       numeric(10,2) not null default 0,
+  override_honorarium    numeric(10,2) not null default 0,
+  override_final_price   numeric(10,2),
+  position               int           not null default 0
+);
+
+create index idx_combination_items_combo on public.combination_items(combination_id);
+
+alter table public.combination_items enable row level security;
+
+create policy "Autenticados leem itens de composição"
+  on public.combination_items for select
+  using (auth.uid() is not null);
+
+create policy "Admin gere itens de composição"
+  on public.combination_items for all
+  using (
+    exists (
+      select 1 from public.profiles p
+      where p.id = auth.uid() and p.role = 'admin'
+    )
+  );
+
+-- ─── Função transacional: substitui itens de uma composição existente ─────────
+-- Garante atomicidade: se o insert falhar, o update e o delete são revertidos.
+
+create or replace function public.replace_combination(
+  p_combination_id uuid,
+  p_label          text,
+  p_duration_value int,
+  p_duration_unit  text,
+  p_notes          text,
+  p_items          jsonb
+) returns void language plpgsql security invoker set search_path = public as $$
+begin
+  update public.combination_overrides
+     set label          = p_label,
+         duration_value = p_duration_value,
+         duration_unit  = p_duration_unit,
+         notes          = p_notes
+   where id = p_combination_id;
+
+  delete from public.combination_items
+   where combination_id = p_combination_id;
+
+  insert into public.combination_items (
+    combination_id,
+    source_type,
+    source_id,
+    override_title,
+    override_beds,
+    override_drive_minutes,
+    override_monthly_rent,
+    override_deposit,
+    override_honorarium,
+    override_final_price,
+    position
+  )
+  select
+    p_combination_id,
+    (it->>'source_type')::text,
+    nullif(it->>'source_id', '')::uuid,
+    it->>'override_title',
+    nullif(it->>'override_beds', '')::int,
+    nullif(it->>'override_drive_minutes', '')::int,
+    nullif(it->>'override_monthly_rent', '')::numeric,
+    coalesce((it->>'override_deposit')::numeric, 0),
+    coalesce((it->>'override_honorarium')::numeric, 0),
+    nullif(it->>'override_final_price', '')::numeric,
+    coalesce((it->>'position')::int, 0)
+  from jsonb_array_elements(p_items) as it;
+end;
+$$;
 
 -- ════════════════════════════════════════════════════════════════════════
 -- VIEWS

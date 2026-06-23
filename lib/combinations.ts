@@ -10,7 +10,30 @@
 //   - imóveis sem mobília são válidos (sinalizados)
 // ════════════════════════════════════════════════════════════
 
-import type { SearchResult } from "@/types";
+import type {
+  SearchResult,
+  CombinationSourceType,
+  PropertyPlatform,
+} from "@/types";
+
+// ─── EditableItem — tipo unificado para itens mutáveis da combinação ──────────
+
+export interface EditableItem {
+  key: string;
+  sourceType: CombinationSourceType;
+  sourceId: string | null;
+  title: string | null;
+  address: string | null;
+  platform: PropertyPlatform | null;
+  furnished: boolean;
+  beds: number;
+  driveMinutes: number | null;
+  monthlyRent: number;
+  deposit: number;
+  honorarium: number;
+  finalPrice: number | null;
+  externalUrl: string | null;
+}
 
 export interface Combination {
   type: "single" | "double" | "triple";
@@ -192,4 +215,88 @@ function byCost(a: Combination, b: Combination): number {
 function relabel(c: Combination, i: number): Combination {
   const prefix = c.type === "double" ? "Combinação" : "Combinação";
   return { ...c, label: `${prefix} ${String.fromCharCode(65 + i)}` };
+}
+
+// ════════════════════════════════════════════════════════════
+// Lógica financeira do Allan — Onda 5 FASE 3
+//
+// Glossário:
+//   honorarium = pago 1×, NÃO volta (gasto definitivo)
+//   deposit    = pago no início, VOLTA no fim (crédito)
+//   finalPrice = barganha do Allan; quando preenchido sobrescreve monthlyRent
+//
+// Validação com exemplos reais do Allan (1 mês):
+//   Opção A: 3 imóveis, aluguel 4910€/mês, 3 calções 1000€, 3 honorários 400€
+//     → initialOutflow = 4910 + 3000 + 1200 = 9110€
+//     → netCost       = 4910 + 1200        = 6110€
+//   Opção B: 4 imóveis, aluguel 4930€/mês, 2 calções 1000€, 2 honorários 400€
+//     → initialOutflow = 4930 + 2000 + 800 = 7730€
+//     → netCost        = 4930 + 800        = 5730€  ← B é mais barata no líquido
+// ════════════════════════════════════════════════════════════
+
+export interface FinancialItemInput {
+  beds: number;
+  driveMinutes: number | null;
+  monthlyRent: number;
+  deposit: number;
+  honorarium: number;
+  finalPrice: number | null;
+}
+
+export interface CombinationFinancials {
+  durationMonths: number;
+  totalRent: number;
+  totalHonorarium: number;
+  totalDeposit: number;
+  totalExpenses: number;
+  totalCredit: number;
+  initialOutflow: number;
+  netCost: number;
+  netCostPerPerson: number;
+  netCostPerProperty: number;
+}
+
+export function calculateFinancials(
+  items: FinancialItemInput[],
+  duration: { value: number; unit: "months" | "weeks" | "days" },
+  workersNeeded: number
+): CombinationFinancials {
+  const durationMonths =
+    duration.unit === "months"
+      ? duration.value
+      : duration.unit === "weeks"
+        ? (duration.value * 7) / 30
+        : duration.value / 30;
+
+  const effectiveRent = (item: FinancialItemInput) =>
+    item.finalPrice ?? item.monthlyRent;
+
+  const totalRent = items.reduce(
+    (sum, item) => sum + effectiveRent(item) * durationMonths,
+    0
+  );
+  const totalHonorarium = items.reduce((sum, item) => sum + item.honorarium, 0);
+  const totalDeposit = items.reduce((sum, item) => sum + item.deposit, 0);
+  const totalExpenses = totalRent + totalHonorarium + totalDeposit;
+  const totalCredit = totalDeposit;
+  const initialOutflow =
+    items.reduce((sum, item) => sum + effectiveRent(item), 0) +
+    totalDeposit +
+    totalHonorarium;
+  const netCost = totalExpenses - totalCredit;
+  const netCostPerPerson = workersNeeded > 0 ? netCost / workersNeeded : 0;
+  const netCostPerProperty = items.length > 0 ? netCost / items.length : 0;
+
+  return {
+    durationMonths,
+    totalRent,
+    totalHonorarium,
+    totalDeposit,
+    totalExpenses,
+    totalCredit,
+    initialOutflow,
+    netCost,
+    netCostPerPerson,
+    netCostPerProperty,
+  };
 }

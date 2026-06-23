@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Link from "next/link";
 import {
   Phone,
   Mail,
@@ -9,35 +10,18 @@ import {
   Trash2,
   CalendarClock,
   Loader2,
+  Home,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/lib/i18n";
 import { deleteContact, updateContactRating } from "@/app/(app)/history/actions";
 import type { Contact, ContactRating } from "@/types";
 
-const RATING_CONFIG: Record<
-  ContactRating,
-  { label: string; className: string }
-> = {
-  good: {
-    label: "Bom",
-    className:
-      "text-green-400 bg-[var(--green-soft)] border-[var(--green-border)]",
-  },
-  neutral: {
-    label: "Neutro",
-    className: "text-ink-muted bg-surface-4 border-[var(--hairline)]",
-  },
-  bad: {
-    label: "Mau",
-    className: "text-red-400 bg-[var(--red-soft)] border-[var(--red-border)]",
-  },
+const RATING_CLASS: Record<ContactRating, string> = {
+  good: "text-green-400 bg-[var(--green-soft)] border-[var(--green-border)]",
+  neutral: "text-ink-muted bg-surface-4 border-[var(--hairline)]",
+  bad: "text-red-400 bg-[var(--red-soft)] border-[var(--red-border)]",
 };
-
-const RATING_OPTIONS: { value: ContactRating; label: string }[] = [
-  { value: "good", label: "Bom" },
-  { value: "neutral", label: "Neutro" },
-  { value: "bad", label: "Mau" },
-];
 
 function formatLastUsed(iso: string | null) {
   if (!iso) return null;
@@ -51,16 +35,34 @@ function formatLastUsed(iso: string | null) {
 export function ContactCard({
   contact,
   isAdmin,
+  linkedCount = 0,
+  highlighted = false,
 }: {
   contact: Contact;
   isAdmin: boolean;
+  linkedCount?: number;
+  highlighted?: boolean;
 }) {
+  const { t } = useI18n();
   const [isPendingDelete, startDelete] = useTransition();
   const [isPendingRating, startRating] = useTransition();
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const rating = RATING_CONFIG[contact.rating];
+  const ratingLabels: Record<ContactRating, string> = {
+    good: t("contacts.rating.good"),
+    neutral: t("contacts.rating.neutral"),
+    bad: t("contacts.rating.bad"),
+  };
+
+  const ratingOptions: { value: ContactRating; label: string }[] = [
+    { value: "good", label: t("contacts.rating.good") },
+    { value: "neutral", label: t("contacts.rating.neutral") },
+    { value: "bad", label: t("contacts.rating.bad") },
+  ];
+
+  const ratingClassName = RATING_CLASS[contact.rating];
+  const ratingLabel = ratingLabels[contact.rating];
   const lastUsed = formatLastUsed(contact.last_used);
 
   function handleDelete() {
@@ -87,7 +89,8 @@ export function ContactCard({
       className={cn(
         "group relative rounded-[var(--radius-lg)] border border-[var(--hairline)] bg-surface-2 p-5",
         "transition-all duration-200 hover:border-[var(--hairline-medium)]",
-        "hover:shadow-[var(--shadow-md)]"
+        "hover:shadow-[var(--shadow-md)]",
+        highlighted && "ring-1 ring-[var(--orange-border)]"
       )}
     >
       {/* Cabeçalho */}
@@ -108,13 +111,14 @@ export function ContactCard({
             value={contact.rating}
             onChange={handleRatingChange}
             disabled={isPendingRating}
+            aria-label={t("contacts.rating.all")}
             className={cn(
               "cursor-pointer rounded-[var(--radius-pill)] border px-2.5 py-[3px] text-xs font-medium",
               "appearance-none focus:outline-none disabled:opacity-50",
-              rating.className
+              ratingClassName
             )}
           >
-            {RATING_OPTIONS.map((opt) => (
+            {ratingOptions.map((opt) => (
               <option key={opt.value} value={opt.value}>
                 {opt.label}
               </option>
@@ -124,10 +128,10 @@ export function ContactCard({
           <span
             className={cn(
               "inline-flex items-center rounded-[var(--radius-pill)] border px-2.5 py-[3px] text-xs font-medium",
-              rating.className
+              ratingClassName
             )}
           >
-            {rating.label}
+            {ratingLabel}
           </span>
         )}
       </div>
@@ -160,6 +164,21 @@ export function ContactCard({
         )}
       </div>
 
+      {/* Alojamentos vinculados */}
+      {linkedCount > 0 && (
+        <div className="mt-3">
+          <Link
+            href={`/accommodations?tab=external&contact=${contact.id}`}
+            className="inline-flex items-center gap-1.5 text-xs text-orange-400 hover:underline"
+          >
+            <Home size={12} strokeWidth={1.5} />
+            <span>
+              {linkedCount} {t("contacts.linkedAccommodations")}
+            </span>
+          </Link>
+        </div>
+      )}
+
       {/* Notas */}
       {contact.notes && (
         <p className="mt-3 rounded-[var(--radius-sm)] bg-surface-3 px-3 py-2 text-xs leading-relaxed text-ink-muted">
@@ -172,10 +191,10 @@ export function ContactCard({
         {lastUsed ? (
           <div className="flex items-center gap-1 text-xs text-ink-subtle">
             <CalendarClock size={11} strokeWidth={1.5} />
-            <span>Último uso: {lastUsed}</span>
+            <span>{t("contacts.lastUsed")} {lastUsed}</span>
           </div>
         ) : (
-          <span className="text-xs text-ink-subtle">Nunca utilizado</span>
+          <span className="text-xs text-ink-subtle">{t("contacts.neverUsed")}</span>
         )}
 
         {isAdmin && (
@@ -190,7 +209,8 @@ export function ContactCard({
                 : "text-ink-subtle opacity-0 hover:bg-surface-4 hover:text-red-400 group-hover:opacity-100",
               "disabled:cursor-not-allowed disabled:opacity-40"
             )}
-            title={confirmDelete ? "Clica novamente para confirmar" : "Eliminar contacto"}
+            aria-label={confirmDelete ? t("contacts.deleteConfirm") : t("action.delete")}
+            title={confirmDelete ? t("contacts.deleteConfirm") : t("action.delete")}
           >
             {isPendingDelete ? (
               <Loader2 size={14} strokeWidth={2} className="animate-spin" />
@@ -213,7 +233,7 @@ export function ContactCard({
           onClick={() => setConfirmDelete(false)}
           className="mt-2 block w-full cursor-pointer text-center text-xs text-ink-subtle hover:text-ink"
         >
-          Cancelar eliminação
+          {t("contacts.cancelDelete")}
         </button>
       )}
     </div>
