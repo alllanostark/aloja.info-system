@@ -15,6 +15,11 @@ export interface GeocodeResult extends GeoPoint {
   formattedAddress: string;
   /** Cidade/município (locality) — usada como termo de busca nos atores. */
   city: string | null;
+  /** Província (administrative_area_level_2, ex: "Girona"). Termo de busca
+   *  robusto: existe nas plataformas mesmo quando a vila não existe lá. */
+  province: string | null;
+  /** País (ex: "España") — salvaguarda contra resultados fora do país. */
+  country: string | null;
 }
 
 /** Converte um endereço em coordenadas (Geocoding API). */
@@ -40,15 +45,36 @@ export async function geocode(
       pick("postal_town") ??
       pick("administrative_area_level_2") ??
       null;
+    const province = pick("administrative_area_level_2");
+    const country = pick("country");
     return {
       lat: r.geometry.location.lat,
       lng: r.geometry.location.lng,
       formattedAddress: r.formatted_address,
       city,
+      province,
+      country,
     };
   } catch {
     return null;
   }
+}
+
+/**
+ * Distância em linha reta (km) entre dois pontos — fórmula de Haversine.
+ * Sem custo de API. Salvaguarda barata contra resultados de outra região
+ * quando o tempo de condução não pôde ser calculado.
+ */
+export function haversineKm(a: GeoPoint, b: GeoPoint): number {
+  const R = 6371;
+  const dLat = ((b.lat - a.lat) * Math.PI) / 180;
+  const dLng = ((b.lng - a.lng) * Math.PI) / 180;
+  const lat1 = (a.lat * Math.PI) / 180;
+  const lat2 = (b.lat * Math.PI) / 180;
+  const h =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(h));
 }
 
 /**

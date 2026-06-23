@@ -15,7 +15,9 @@ export type PropertyPlatform =
   | "airbnb"
   | "vivara"
   | "spotahome"
-  | "uniplaces";
+  | "uniplaces"
+  | "pisos"
+  | "yaencontre";
 export type DiscardReason =
   | "price"
   | "distance"
@@ -150,4 +152,6 @@ export const PLATFORM_META: Record<
   vivara: { label: "Vivara", short: "VV" },
   spotahome: { label: "Spotahome", short: "SP" },
   uniplaces: { label: "Uniplaces", short: "UP" },
+  pisos: { label: "pisos.com", short: "PS" },
+  yaencontre: { label: "Yaencontre", short: "YE" },
 };

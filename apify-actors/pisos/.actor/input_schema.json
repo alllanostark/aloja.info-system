@@ -1,0 +1,32 @@
+{
+  "title": "Input",
+  "type": "object",
+  "schemaVersion": 1,
+  "properties": {
+    "location": {
+      "title": "Localização",
+      "type": "string",
+      "description": "Cidade ou zona a pesquisar (ex: 'barcelona'). Usado como slug no URL: /alquiler/pisos-{slug}/",
+      "editor": "textfield"
+    },
+    "maxResults": {
+      "title": "Máximo de resultados",
+      "type": "integer",
+      "description": "Número máximo de imóveis a recolher (por defeito: 25)",
+      "default": 25
+    },
+    "minBeds": {
+      "title": "Mínimo de quartos",
+      "type": "integer",
+      "description": "Número mínimo de quartos/camas (por defeito: 1)",
+      "default": 1
+    },
+    "maxPricePerPerson": {
+      "title": "Preço máximo por pessoa (€/mês)",
+      "type": "integer",
+      "description": "Limite máximo de custo por pessoa calculado como preço_total / nº_quartos (por defeito: 450€)",
+      "default": 450
+    }
+  },
+  "required": ["location"]
+}

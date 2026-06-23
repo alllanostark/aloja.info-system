@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/auth";
-import { geocode, driveMinutes } from "@/lib/maps";
+import { geocode, driveMinutes, haversineKm } from "@/lib/maps";
 import { searchAllPlatforms, type ScrapedListing } from "@/lib/apify";
 
 export interface CreateSearchInput {
@@ -62,6 +62,7 @@ export async function createSearch(
     const { listings, platformStatus } = await searchAllPlatforms({
       obraAddress: geo?.formattedAddress ?? input.obraAddress,
       obraCity: geo?.city ?? null,
+      obraProvince: geo?.province ?? null,
       obraLat: obraLat ?? DEFAULT_OBRA.lat,
       obraLng: obraLng ?? DEFAULT_OBRA.lng,
       numWorkers: input.numWorkers,
@@ -146,9 +147,42 @@ export async function createSearch(
       }));
     }
 
+    // 6b. Filtro geográfico — remove imóveis fora do alcance real da obra.
+    //   As plataformas redirecionam buscas de vilas pequenas para listagens
+    //   nacionais; sem este filtro, vinham imóveis a centenas de km (Albacete,
+    //   Granada) numa busca de Girona. Regras:
+    //     - drive confirmado acima do teto (+50% de margem) → descarta.
+    //     - sem drive mas com coords → valida por distância em linha reta.
+    //     - sem drive nem coords → não dá para garantir proximidade → descarta.
+    const driveCap = Math.max(input.maxDriveMinutes * 1.5, 60);
+    const radiusKm = Math.max(input.maxDriveMinutes * 1.5, 60);
+    const relevant = enriched.filter((l) => {
+      if (l.drive_minutes != null) return l.drive_minutes <= driveCap;
+      if (
+        l.resolved_lat != null &&
+        l.resolved_lng != null &&
+        obraLat != null &&
+        obraLng != null
+      ) {
+        return (
+          haversineKm(
+            { lat: obraLat, lng: obraLng },
+            { lat: l.resolved_lat, lng: l.resolved_lng }
+          ) <= radiusKm
+        );
+      }
+      return false;
+    });
+    const discarded = enriched.length - relevant.length;
+    if (discarded > 0) {
+      console.info(
+        `[busca] ${discarded}/${enriched.length} imóveis fora do alcance (teto ${input.maxDriveMinutes}min) descartados.`
+      );
+    }
+
     // 7. Persistir resultados com flag is_demo por linha
-    if (enriched.length) {
-      const rows = enriched.map((l) => ({
+    if (relevant.length) {
+      const rows = relevant.map((l) => ({
         search_id: search.id,
         platform: l.platform,
         external_url: l.external_url,

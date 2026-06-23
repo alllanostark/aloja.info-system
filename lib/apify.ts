@@ -21,14 +21,17 @@ const APIFY_TOKEN = process.env.APIFY_API_TOKEN ?? "";
 // Spotahome + Uniplaces (aluguer mensal mobilado). Continua no tipo/enum
 // para integridade de dados históricos.
 export const PLATFORMS: PropertyPlatform[] = [
-  "idealista",
+  // Apenas plataformas com ator afinado e funcional (senão geram demo/erro e
+  // poluem os resultados reais). Idealista fica de fora (DataDome bloqueia mesmo
+  // com residencial — precisa de desbloqueador pago); vivara/homyspace sem ator.
   "fotocasa",
   "habitaclia",
   "spotahome",
   "uniplaces",
   "milanuncios",
   "airbnb",
-  "vivara",
+  "pisos",
+  "yaencontre",
 ];
 
 /** Fiabilidade conhecida (anti-bot). Informativo para a UI. */
@@ -42,6 +45,8 @@ export const PLATFORM_RELIABILITY: Record<PropertyPlatform, "stable" | "unstable
   vivara: "stable",
   spotahome: "stable",
   uniplaces: "stable",
+  pisos: "stable",
+  yaencontre: "unstable",
 };
 
 /** Ator Apify por plataforma (configurável por env). */
@@ -60,9 +65,12 @@ const ANY_ACTOR_CONFIGURED = Object.keys(process.env).some(
 
 export interface SearchParams {
   obraAddress: string;
-  /** Cidade extraída do endereço (geocode) — é o termo de busca dos atores.
-   *  Os atores precisam da cidade ("Barcelona"), não da rua completa. */
+  /** Cidade extraída do endereço (geocode). */
   obraCity?: string | null;
+  /** Província (geocode) — termo de busca PREFERENCIAL dos atores: existe nas
+   *  plataformas mesmo quando a vila/cidade pequena não tem página própria.
+   *  Sem isto, vilas como "Sant Jaume de Llierca" caem em listagem nacional. */
+  obraProvince?: string | null;
   obraLat: number;
   obraLng: number;
   numWorkers: number;
@@ -283,7 +291,8 @@ async function scrapePlatform(
 
   try {
     const raw = await runActor(actorId, {
-      location: params.obraCity || params.obraAddress,
+      // Província primeiro (existe nas plataformas); cidade e morada como fallback.
+      location: params.obraProvince || params.obraCity || params.obraAddress,
       maxResults: 25,
       maxItems: 25,
       minBeds: 1,
