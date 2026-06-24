@@ -1,6 +1,6 @@
 import { Actor } from 'apify';
 import { CheerioCrawler, log } from 'crawlee';
-import * as cheerio from 'cheerio';
+import type { CheerioAPI } from 'cheerio';
 
 // ---------------------------------------------------------------------------
 // Input
@@ -107,7 +107,7 @@ function inferBeds(propType: string, title: string): number {
  * Extrai o mapa { relativeUrl → LdAboutItem } do JSON-LD SearchResultsPage.
  * Retorna {} se não existir ou falhar o parse.
  */
-function extractLdMap($: cheerio.CheerioAPI): Map<string, LdAboutItem> {
+function extractLdMap($: CheerioAPI): Map<string, LdAboutItem> {
   const map = new Map<string, LdAboutItem>();
   $('script[type="application/ld+json"]').each((_i, el) => {
     try {

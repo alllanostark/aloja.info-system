@@ -21,7 +21,9 @@ apify login --token "$TOKEN"
 echo ""
 
 # Push de cada ator
-ACTORS=("milanuncios" "habitaclia" "homyspace" "spotahome" "uniplaces" "fotocasa" "airbnb" "idealista")
+# homyspace: vazio por design (sem grelha pública), fora do PLATFORMS
+# idealista: pausado por DataDome — manter no array para re-deploy quando desbloquear
+ACTORS=("milanuncios" "habitaclia" "spotahome" "uniplaces" "fotocasa" "airbnb" "pisos" "yaencontre" "idealista")
 
 for actor in "${ACTORS[@]}"; do
   echo "==============================="
