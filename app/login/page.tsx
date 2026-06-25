@@ -17,6 +17,7 @@ export default function LoginPage() {
           interactive
           parallax
           mixBlendMode="screen"
+          maxPixelRatio={1}
         />
       </div>
 

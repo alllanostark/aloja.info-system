@@ -85,9 +85,10 @@ export function AppShell({ userName, userRole, children }: AppShellProps) {
           lineCount={4}
           lineDistance={9}
           animationSpeed={0.3}
-          interactive
-          parallax
+          interactive={false}
+          parallax={false}
           mixBlendMode="screen"
+          maxPixelRatio={1}
         />
       </div>
 
