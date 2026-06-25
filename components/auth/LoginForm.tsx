@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Home, Loader2 } from "lucide-react";
+import GlassSurface from "@/components/ui/GlassSurface/GlassSurface";
 
 export function LoginForm() {
   const router = useRouter();
@@ -50,10 +51,22 @@ export function LoginForm() {
         </div>
       </div>
 
-      <form
-        onSubmit={handleSubmit}
-        className="rounded-[var(--radius-xl)] border border-[var(--hairline-medium)] bg-surface-1 p-6"
+      <GlassSurface
+        width="100%"
+        height="auto"
+        borderRadius={24}
+        brightness={55}
+        opacity={0.9}
+        blur={11}
+        backgroundOpacity={0.08}
+        saturation={1.2}
+        distortionScale={-150}
+        className="w-full"
       >
+        <form
+          onSubmit={handleSubmit}
+          className="w-full rounded-[var(--radius-xl)] p-6"
+        >
         <label className="mb-1.5 block text-sm font-medium text-ink-muted">
           Email
         </label>
@@ -89,12 +102,13 @@ export function LoginForm() {
         <button
           type="submit"
           disabled={loading}
-          className="mt-5 flex w-full items-center justify-center gap-2 rounded-[var(--radius-md)] bg-orange-500 px-4 py-2.5 text-sm font-medium text-white transition-all duration-150 hover:bg-orange-400 active:scale-[0.99] disabled:opacity-60"
+          className="btn-glass-accent mt-5 flex w-full items-center justify-center gap-2 rounded-[var(--radius-md)] px-4 py-2.5 text-sm font-medium disabled:opacity-60"
         >
           {loading && <Loader2 size={16} className="animate-spin" />}
           {loading ? "A entrar…" : "Entrar"}
         </button>
-      </form>
+        </form>
+      </GlassSurface>
     </div>
   );
 }

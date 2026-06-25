@@ -162,7 +162,7 @@ export function BedSlot({
             <button
               onClick={handleAssign}
               disabled={isPending || !workerName.trim()}
-              className="flex flex-1 items-center justify-center gap-1 rounded-[var(--radius-sm)] bg-orange-500 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-orange-400 cursor-pointer disabled:opacity-40"
+              className="flex flex-1 items-center justify-center gap-1 rounded-[var(--radius-sm)] btn-glass-accent px-3 py-1.5 text-sm font-medium cursor-pointer disabled:opacity-40"
             >
               {isPending && <Loader2 size={14} className="animate-spin" />}
               Confirmar

@@ -491,7 +491,7 @@ function CombinationModal({
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 24 }}
           transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
-          className="relative z-10 max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded-[var(--radius-xl)] border border-[var(--hairline-medium)] bg-surface-2 p-6"
+          className="glass-panel relative z-10 max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded-[var(--radius-xl)] p-6"
         >
           {/* SECÇÃO A — Header com título editável (Task 4.3) */}
           <div className="mb-5 flex items-start justify-between">

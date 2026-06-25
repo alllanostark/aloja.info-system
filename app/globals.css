@@ -7,13 +7,13 @@
    ════════════════════════════════════════════════════════════ */
 
 @theme inline {
-  /* ── Canvas & Surface ladder ── */
-  --color-canvas: #07080a;
-  --color-surface-1: #0d0f12;
-  --color-surface-2: #111318;
-  --color-surface-3: #181b22;
-  --color-surface-4: #1f2330;
-  --color-surface-5: #272c3a;
+  /* ── Canvas & Surface ladder (Apple Sonoma — grafite, fim do preto puro) ── */
+  --color-canvas: oklch(0.17 0.006 265);
+  --color-surface-1: oklch(0.21 0.008 265);
+  --color-surface-2: oklch(0.24 0.009 265);
+  --color-surface-3: oklch(0.28 0.01 265);
+  --color-surface-4: oklch(0.33 0.011 265);
+  --color-surface-5: oklch(0.38 0.012 265);
 
   /* ── Marca Sparks (laranja) ── */
   --color-orange-300: #fdb06a;
@@ -30,11 +30,11 @@
   --color-yellow-400: #fbbf24;
   --color-yellow-500: #f59e0b;
 
-  /* ── Texto ── */
-  --color-ink: #f4f4f6;
-  --color-ink-muted: #a1a5b0;
-  --color-ink-subtle: #62666d;
-  --color-ink-disabled: #3a3d45;
+  /* ── Texto (recalibrado p/ contraste sobre surfaces mais claros) ── */
+  --color-ink: oklch(0.98 0 0);
+  --color-ink-muted: oklch(0.78 0.005 265);
+  --color-ink-subtle: oklch(0.65 0.006 265);
+  --color-ink-disabled: oklch(0.48 0.006 265);
 
   /* ── Fonte ── */
   --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
@@ -72,9 +72,15 @@
   --hairline-strong: rgba(255, 255, 255, 0.16);
   --hairline-hover: rgba(255, 255, 255, 0.2);
 
-  /* Glass */
-  --glass-bg: rgba(13, 15, 18, 0.85);
-  --glass-border: rgba(255, 255, 255, 0.07);
+  /* Glass (Apple-style) */
+  --glass-bg: rgba(20, 22, 28, 0.72);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --surface-glass: rgba(30, 33, 42, 0.55);
+  --border-glass: rgba(255, 255, 255, 0.12);
+  --shadow-glass:
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    0 2px 8px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 
   /* Shadows */
   --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.6);
@@ -182,4 +188,111 @@ body {
 }
 .vacancy-pulse {
   animation: vacancy-pulse 2s ease-in-out infinite;
+}
+
+/* Glass utilities (Apple-style) — replicam o visual do GlassSurface */
+
+/* Painel de vidro estático (modais, superfícies grandes) */
+.glass-panel {
+  background: var(--surface-glass);
+  --glass-blur: blur(22px) saturate(1.6);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border-glass);
+  box-shadow:
+    var(--shadow-glass),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Card de vidro interativo — eleva no hover */
+.glass-card {
+  --glass-blur: blur(20px) saturate(1.5);
+  background: var(--surface-glass);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border-glass);
+  box-shadow:
+    var(--shadow-glass),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+.glass-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--hairline-hover);
+  background: rgba(40, 44, 56, 0.62);
+  box-shadow:
+    var(--shadow-lg),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+
+/* Botão de vidro neutro — glass + animação no hover */
+.btn-glass {
+  position: relative;
+  isolation: isolate;
+  cursor: pointer;
+  color: var(--color-ink);
+  background: rgba(255, 255, 255, 0.06);
+  --glass-blur: blur(16px) saturate(1.5);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border-glass);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    0 2px 10px rgba(0, 0, 0, 0.3);
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease,
+    filter 0.18s ease;
+}
+.btn-glass:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 6px 20px rgba(0, 0, 0, 0.35);
+  filter: brightness(1.05);
+}
+.btn-glass:active {
+  transform: translateY(0) scale(0.98);
+  filter: brightness(0.97);
+}
+
+/* Botão de vidro com tint laranja Sparks — CTA primário */
+.btn-glass-accent {
+  position: relative;
+  isolation: isolate;
+  cursor: pointer;
+  color: #fff;
+  background: linear-gradient(
+    180deg,
+    rgba(251, 146, 60, 0.96) 0%,
+    rgba(249, 115, 22, 0.96) 100%
+  );
+  border: 1px solid var(--orange-border);
+  --glass-blur: blur(8px) saturate(1.4);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.32),
+    0 2px 12px var(--orange-glow);
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    filter 0.18s ease;
+}
+.btn-glass-accent:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.06);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.38),
+    0 6px 24px var(--orange-glow);
+}
+.btn-glass-accent:active {
+  transform: translateY(0) scale(0.98);
+  filter: brightness(0.98);
 }

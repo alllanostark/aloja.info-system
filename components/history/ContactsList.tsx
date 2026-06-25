@@ -176,7 +176,7 @@ export function ContactsList({
                 "transition-all duration-150 active:scale-[0.99]",
                 showForm
                   ? "bg-surface-4 text-ink-muted hover:text-ink"
-                  : "bg-orange-500 text-white hover:bg-orange-400"
+                  : "btn-glass-accent"
               )}
             >
               <Plus size={16} strokeWidth={2} />

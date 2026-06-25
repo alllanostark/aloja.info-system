@@ -65,7 +65,7 @@ export function ImportAgenciesButton() {
         <button
           onClick={run}
           disabled={pending || !location.trim()}
-          className="flex cursor-pointer items-center gap-1.5 rounded-[var(--radius-sm)] bg-orange-500 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-orange-400 disabled:opacity-50"
+          className="flex cursor-pointer items-center gap-1.5 rounded-[var(--radius-sm)] btn-glass-accent px-3 py-1.5 text-xs font-medium disabled:opacity-50"
         >
           {pending ? (
             <>

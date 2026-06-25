@@ -38,10 +38,7 @@ export function MetricCard({
   return (
     <div
       className={cn(
-        "group relative rounded-[var(--radius-lg)] border bg-surface-2 p-6",
-        "border-[var(--hairline)] transition-all duration-200",
-        "hover:-translate-y-0.5 hover:border-[var(--hairline-medium)]",
-        "hover:shadow-[var(--shadow-md)]"
+        "glass-card group relative rounded-[var(--radius-lg)] p-6"
       )}
     >
       <div className="flex items-start justify-between">

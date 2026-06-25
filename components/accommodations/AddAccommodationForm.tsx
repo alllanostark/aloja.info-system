@@ -443,7 +443,7 @@ export function AddAccommodationForm({
             type="submit"
             onClick={() => formRef.current?.requestSubmit()}
             disabled={isPending}
-            className="flex items-center gap-2 rounded-[var(--radius-md)] bg-orange-500 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-orange-400 active:scale-[0.99] cursor-pointer disabled:opacity-50"
+            className="flex items-center gap-2 rounded-[var(--radius-md)] btn-glass-accent px-4 py-2 text-sm font-medium cursor-pointer disabled:opacity-50"
           >
             {isPending && <Loader2 size={14} className="animate-spin" />}
             {t("action.save")}

@@ -67,7 +67,7 @@ export function Sidebar({ userName, userRole, open = false, onClose }: SidebarPr
         ref={drawerRef}
         className={cn(
           // Desktop: fixo na coluna, sem transformações
-          "flex h-screen w-60 flex-col border-r border-[var(--hairline)] bg-surface-1",
+          "flex h-screen w-60 flex-col border-r border-[var(--border-glass)] bg-[var(--glass-bg)] backdrop-blur-2xl",
           // Mobile: drawer fixo com translate controlado por `open`
           "fixed inset-y-0 left-0 z-40 transition-transform duration-200 ease-in-out",
           "md:relative md:translate-x-0 md:z-auto md:transition-none",

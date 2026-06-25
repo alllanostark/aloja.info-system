@@ -63,7 +63,7 @@ export function SearchHistoryList({ searches }: { searches: SearchType[] }) {
         </p>
         <Link
           href="/search"
-          className="mt-4 rounded-[var(--radius-md)] bg-orange-500 px-3.5 py-2 text-sm font-medium text-white transition-colors hover:bg-orange-400"
+          className="mt-4 rounded-[var(--radius-md)] btn-glass-accent px-3.5 py-2 text-sm font-medium"
         >
           Nova Busca
         </Link>

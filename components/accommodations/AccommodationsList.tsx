@@ -148,7 +148,7 @@ function EmptyState({
         {isAdmin && (
           <button
             onClick={onAdd}
-            className="mt-6 flex items-center gap-2 rounded-[var(--radius-md)] bg-orange-500 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-orange-400 active:scale-[0.99] cursor-pointer"
+            className="mt-6 flex items-center gap-2 rounded-[var(--radius-md)] btn-glass-accent px-4 py-2 text-sm font-medium cursor-pointer"
           >
             <Plus size={16} strokeWidth={2} />
             {t("accommodations.external.emptyCta")}
@@ -172,7 +172,7 @@ function EmptyState({
       {isAdmin && tab === "active" && (
         <button
           onClick={onAdd}
-          className="mt-6 flex items-center gap-2 rounded-[var(--radius-md)] bg-orange-500 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-orange-400 active:scale-[0.99] cursor-pointer"
+          className="mt-6 flex items-center gap-2 rounded-[var(--radius-md)] btn-glass-accent px-4 py-2 text-sm font-medium cursor-pointer"
         >
           <Plus size={16} strokeWidth={2} />
           {t("accommodations.empty.add")}
@@ -199,7 +199,7 @@ export function AddAccommodationButton({
     <>
       <button
         onClick={() => setShowForm(true)}
-        className="flex items-center gap-2 rounded-[var(--radius-md)] bg-orange-500 px-3.5 py-2 text-sm font-medium text-white transition-all duration-150 hover:bg-orange-400 active:scale-[0.99] cursor-pointer"
+        className="flex items-center gap-2 rounded-[var(--radius-md)] btn-glass-accent px-3.5 py-2 text-sm font-medium cursor-pointer"
       >
         <Plus size={16} strokeWidth={2} />
         {t("accommodations.form.title")}

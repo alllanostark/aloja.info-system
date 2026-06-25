@@ -226,7 +226,7 @@ export function SearchForm() {
             <button
               onClick={() => setStep((s) => s + 1)}
               disabled={!canNext}
-              className="flex items-center gap-2 rounded-[var(--radius-md)] bg-orange-500 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-orange-400 active:scale-[0.99] disabled:opacity-50"
+              className="flex items-center gap-2 rounded-[var(--radius-md)] btn-glass-accent px-4 py-2 text-sm font-medium disabled:opacity-50"
             >
               Continuar <ArrowRight size={16} />
             </button>

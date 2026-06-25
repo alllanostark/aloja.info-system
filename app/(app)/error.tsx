@@ -66,9 +66,8 @@ export default function AppError({
             <button
               onClick={reset}
               className={cn(
-                "w-full rounded-[var(--radius-md)] bg-orange-500 px-4 py-2.5",
-                "text-sm font-medium text-white",
-                "transition-colors hover:bg-orange-600 active:bg-orange-700",
+                "btn-glass-accent w-full rounded-[var(--radius-md)] px-4 py-2.5",
+                "text-sm font-medium",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-2",
               )}
             >

@@ -27,6 +27,12 @@ export type TranslationKey =
   | "nav.role.admin"
   | "nav.role.viewer"
   | "nav.logout"
+  // Dock — quick actions
+  | "dock.new_search"
+  | "dock.add_contact"
+  | "dock.add_external"
+  | "dock.compositions"
+  | "dock.recent_history"
   // TopBar — títulos de página
   | "page.dashboard"
   | "page.search"
@@ -230,6 +236,11 @@ const dictionaries: Record<Locale, Dictionary> = {
     "nav.role.admin": "Administrador",
     "nav.role.viewer": "Visualização",
     "nav.logout": "Terminar sessão",
+    "dock.new_search": "Nova busca",
+    "dock.add_contact": "Adicionar contacto",
+    "dock.add_external": "Adicionar alojamento externo",
+    "dock.compositions": "Composições salvas",
+    "dock.recent_history": "Histórico recente",
     "page.dashboard": "Dashboard",
     "page.search": "Nova Busca",
     "page.accommodations": "Alojamentos Ativos",
@@ -399,6 +410,11 @@ const dictionaries: Record<Locale, Dictionary> = {
     "nav.role.admin": "Administrador",
     "nav.role.viewer": "Solo lectura",
     "nav.logout": "Cerrar sesión",
+    "dock.new_search": "Nueva búsqueda",
+    "dock.add_contact": "Añadir contacto",
+    "dock.add_external": "Añadir alojamiento externo",
+    "dock.compositions": "Composiciones guardadas",
+    "dock.recent_history": "Historial reciente",
     "page.dashboard": "Panel",
     "page.search": "Nueva Búsqueda",
     "page.accommodations": "Alojamientos Activos",
