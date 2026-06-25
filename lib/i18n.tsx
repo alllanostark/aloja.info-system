@@ -219,7 +219,17 @@ export type TranslationKey =
   | "history.combination.netCost"
   | "history.combination.property"
   | "history.combination.properties"
-  | "history.combination.deleteConfirm";
+  | "history.combination.deleteConfirm"
+  // History — modal de composição salva (visualização read-only)
+  | "history.combination.viewDetails"
+  | "history.combination.badge.saved"
+  | "history.combination.source.search"
+  | "history.combination.source.active"
+  | "history.combination.source.external"
+  | "history.combination.source.discarded"
+  | "history.combination.source.manual"
+  | "history.combination.itemUntitled"
+  | "history.combination.editComingSoon";
 
 type Dictionary = Record<TranslationKey, string>;
 
@@ -399,6 +409,15 @@ const dictionaries: Record<Locale, Dictionary> = {
     "history.combination.property": "imóvel",
     "history.combination.properties": "imóveis",
     "history.combination.deleteConfirm": "Confirmar",
+    "history.combination.viewDetails": "Ver detalhes",
+    "history.combination.badge.saved": "Guardada",
+    "history.combination.source.search": "Pesquisa",
+    "history.combination.source.active": "Ativo",
+    "history.combination.source.external": "Externo",
+    "history.combination.source.discarded": "Excluído",
+    "history.combination.source.manual": "Manual",
+    "history.combination.itemUntitled": "Item sem título",
+    "history.combination.editComingSoon": "Edição em breve",
   },
   es: {
     "nav.section": "Operación",
@@ -573,6 +592,15 @@ const dictionaries: Record<Locale, Dictionary> = {
     "history.combination.property": "inmueble",
     "history.combination.properties": "inmuebles",
     "history.combination.deleteConfirm": "Confirmar",
+    "history.combination.viewDetails": "Ver detalles",
+    "history.combination.badge.saved": "Guardada",
+    "history.combination.source.search": "Búsqueda",
+    "history.combination.source.active": "Activo",
+    "history.combination.source.external": "Externo",
+    "history.combination.source.discarded": "Excluido",
+    "history.combination.source.manual": "Manual",
+    "history.combination.itemUntitled": "Ítem sin título",
+    "history.combination.editComingSoon": "Edición próximamente",
   },
 };
 
