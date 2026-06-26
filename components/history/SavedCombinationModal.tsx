@@ -28,21 +28,21 @@ const SOURCE_LABEL_KEY: Record<CombinationSourceType, TranslationKey> = {
 
 /**
  * Modal read-only de visualização de uma composição salva. Espelha o layout
- * financeiro do CombinationModal (results), mas sem edição: a Ingrid clica num
- * card do histórico e vê items + duração + visão financeira + nota.
+ * financeiro do CombinationModal (results): a Ingrid clica num card do
+ * histórico e vê items + duração + visão financeira + nota.
  *
- * O fluxo de edição completo (CombinationModal) exige SearchResult[] reais +
- * searchId + budgetPerPerson, que não persistem numa composição guardada.
- * Por isso o botão "Editar" fica desabilitado com tooltip "em breve".
- * TODO: reidratar uma composição salva no editor (carregar a busca de origem
- * e reabrir o CombinationModal com overrideId pré-preenchido).
+ * O botão "Editar" (onEdit) reabre a composição no editor completo
+ * (CombinationModal reidratado via initialItems + initialOverrideId), que
+ * persiste as alterações com replace_combination.
  */
 export function SavedCombinationModal({
   combination,
   onClose,
+  onEdit,
 }: {
   combination: CombinationSummary;
   onClose: () => void;
+  onEdit: () => void;
 }) {
   const { t } = useI18n();
   const panelRef = useRef<HTMLDivElement>(null);
@@ -353,13 +353,11 @@ export function SavedCombinationModal({
           >
             {t("action.close")}
           </button>
-          {/* Editar desabilitado: ver TODO no topo do componente. */}
+          {/* Editar: reabre a composição no editor completo (reidratado). */}
           <button
             type="button"
-            disabled
-            title={t("history.combination.editComingSoon")}
-            aria-label={`${t("action.edit")} — ${t("history.combination.editComingSoon")}`}
-            className="btn-glass-accent flex items-center gap-1.5 rounded-[var(--radius-md)] px-4 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50"
+            onClick={onEdit}
+            className="btn-glass-accent flex items-center gap-1.5 rounded-[var(--radius-md)] px-4 py-2 text-sm font-medium"
           >
             <Pencil size={14} strokeWidth={1.75} />
             {t("action.edit")}

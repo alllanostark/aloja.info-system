@@ -43,13 +43,17 @@ export default async function HistoryPage({
 
   const { data: overridesData } = await supabase
     .from("combination_overrides")
-    .select("*, combination_items(*), searches(obra_name, num_workers)")
+    .select("*, combination_items(*), searches(obra_name, num_workers, budget_per_person)")
     .order("created_at", { ascending: false });
 
   const combinations: CombinationSummary[] = (overridesData ?? []).map(
     (ov: Record<string, unknown>) => {
       const combinationItems = (ov.combination_items as Record<string, unknown>[] | null) ?? [];
-      const searchRow = ov.searches as { obra_name: string | null; num_workers: number } | null;
+      const searchRow = ov.searches as {
+        obra_name: string | null;
+        num_workers: number;
+        budget_per_person: number;
+      } | null;
       const workersNeeded = searchRow?.num_workers ?? 1;
 
       const financialInputs: FinancialItemInput[] = combinationItems.map((it) => ({
@@ -95,6 +99,8 @@ export default async function HistoryPage({
         durationUnit: ov.duration_unit as "months" | "weeks" | "days",
         notes: (ov.notes as string | null) ?? null,
         workersNeeded,
+        searchId: ov.search_id as string,
+        budgetPerPerson: searchRow?.budget_per_person ?? 400,
         items,
         financials: fin,
       };

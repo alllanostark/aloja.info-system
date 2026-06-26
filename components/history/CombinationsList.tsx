@@ -7,8 +7,9 @@ import { cn, formatEuro } from "@/lib/utils";
 import { useI18n } from "@/lib/i18n";
 import { deleteCombination } from "@/app/(app)/search/[id]/results/combination-actions";
 import type { CombinationSourceType } from "@/types";
-import type { CombinationFinancials } from "@/lib/combinations";
+import type { Combination, CombinationFinancials, EditableItem } from "@/lib/combinations";
 import { SavedCombinationModal } from "./SavedCombinationModal";
+import { CombinationModal } from "@/components/results/CombinationCard";
 
 // Item de uma composição salva, já achatado a partir de combination_items
 // (apenas os overrides — é o que persiste no banco para composições guardadas).
@@ -37,8 +38,52 @@ export interface CombinationSummary {
   // ── Campos para o modal de visualização (populados server-side) ──
   notes: string | null;
   workersNeeded: number;
+  searchId: string;
+  budgetPerPerson: number;
   items: SavedCombinationItem[];
   financials: CombinationFinancials;
+}
+
+// ── Reidratação para o editor (CombinationModal) ──────────────────────────────
+
+function savedItemToEditable(it: SavedCombinationItem): EditableItem {
+  return {
+    key: `${it.sourceType}:${it.sourceId ?? `pos${it.position}`}`,
+    sourceType: it.sourceType,
+    sourceId: it.sourceId,
+    title: it.title,
+    address: null,
+    platform: null,
+    furnished: true,
+    beds: it.beds,
+    driveMinutes: it.driveMinutes,
+    monthlyRent: it.monthlyRent,
+    deposit: it.deposit,
+    honorarium: it.honorarium,
+    finalPrice: it.finalPrice,
+    externalUrl: null,
+  };
+}
+
+// O CombinationModal só lê combo.label e combo.properties; com initialItems
+// presente, as properties não são usadas — daí os placeholders neutros.
+function toSyntheticCombo(c: CombinationSummary): Combination {
+  return {
+    type: c.items.length >= 3 ? "triple" : c.items.length === 2 ? "double" : "single",
+    label: c.label,
+    propertyIds: c.items
+      .map((i) => i.sourceId)
+      .filter((x): x is string => x !== null),
+    properties: [],
+    totalPrice: 0,
+    totalBeds: 0,
+    costPerPerson: 0,
+    spareBeds: 0,
+    withinBudget: true,
+    hasUnfurnished: false,
+    maxDriveMinutes: null,
+    driveUnknown: false,
+  };
 }
 
 function CombinationCard({
@@ -146,6 +191,7 @@ export function CombinationsList({
 }) {
   const { t } = useI18n();
   const [active, setActive] = useState<CombinationSummary | null>(null);
+  const [editing, setEditing] = useState<CombinationSummary | null>(null);
 
   if (combinations.length === 0) {
     return (
@@ -174,6 +220,31 @@ export function CombinationsList({
           <SavedCombinationModal
             combination={active}
             onClose={() => setActive(null)}
+            onEdit={() => {
+              const target = active;
+              setActive(null);
+              setEditing(target);
+            }}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Editor completo reidratado (mesmo modal usado na criação).
+          Atualiza via replace_combination (overrideId). */}
+      <AnimatePresence>
+        {editing && (
+          <CombinationModal
+            combo={toSyntheticCombo(editing)}
+            workersNeeded={editing.workersNeeded}
+            searchId={editing.searchId}
+            budgetPerPerson={editing.budgetPerPerson}
+            initialItems={editing.items.map(savedItemToEditable)}
+            initialOverrideId={editing.id}
+            initialDuration={editing.durationValue}
+            initialUnit={editing.durationUnit}
+            initialNote={editing.notes ?? ""}
+            onClose={() => setEditing(null)}
+            onSaved={() => setEditing(null)}
           />
         )}
       </AnimatePresence>

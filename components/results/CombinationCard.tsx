@@ -209,26 +209,42 @@ export function CombinationCard({
 
 // ─── CombinationModal ─────────────────────────────────────────────────────────
 
-function CombinationModal({
+export function CombinationModal({
   combo,
   workersNeeded,
   searchId,
   budgetPerPerson,
   onClose,
+  initialItems,
+  initialOverrideId = null,
+  initialDuration = 1,
+  initialUnit = "months",
+  initialNote = "",
+  onSaved,
 }: {
   combo: Combination;
   workersNeeded: number;
   searchId: string;
   budgetPerPerson: number;
   onClose: () => void;
+  /** Reidratação: edita uma composição salva em vez de criar uma nova.
+   *  Quando presente, o estado inicial vem destes valores e o "Salvar
+   *  composição" vira "Atualizar" (replace_combination via initialOverrideId). */
+  initialItems?: EditableItem[];
+  initialOverrideId?: string | null;
+  initialDuration?: number;
+  initialUnit?: "months" | "weeks" | "days";
+  initialNote?: string;
+  /** Chamado após uma atualização bem-sucedida (fecha o editor no histórico). */
+  onSaved?: () => void;
 }) {
   const { t } = useI18n();
   const panelRef = useRef<HTMLDivElement>(null);
   useFocusTrap(panelRef, true, onClose);
 
   // ─── Estado principal: lista mutável de itens ─────────────────────────────
-  const [items, setItems] = useState<EditableItem[]>(() =>
-    combo.properties.map(searchResultToItem)
+  const [items, setItems] = useState<EditableItem[]>(
+    () => initialItems ?? combo.properties.map(searchResultToItem)
   );
 
   // ─── Título editável (Task 4.3) ───────────────────────────────────────────
@@ -246,16 +262,16 @@ function CombinationModal({
   const [confirmRemoveKey, setConfirmRemoveKey] = useState<string | null>(null);
 
   // ─── Duração, nota, share/save ────────────────────────────────────────────
-  const [duration, setDuration] = useState(1);
-  const [unit, setUnit] = useState<"months" | "weeks" | "days">("months");
-  const [note, setNote] = useState("");
+  const [duration, setDuration] = useState(initialDuration);
+  const [unit, setUnit] = useState<"months" | "weeks" | "days">(initialUnit);
+  const [note, setNote] = useState(initialNote);
   const [shareLabel, setShareLabel] = useState<"default" | "copied">("default");
   const [saveError, setSaveError] = useState<string | null>(null);
   const [savedOk, setSavedOk] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   // ─── Persistência de composição (Task 4.4) ────────────────────────────────
-  const [savedOverrideId, setSavedOverrideId] = useState<string | null>(null);
+  const [savedOverrideId, setSavedOverrideId] = useState<string | null>(initialOverrideId);
   const [savingCombo, startComboTransition] = useTransition();
   const [comboSavedOk, setComboSavedOk] = useState(false);
 
@@ -436,7 +452,12 @@ function CombinationModal({
       }
       setSavedOverrideId(result.overrideId ?? null);
       setComboSavedOk(true);
-      setTimeout(() => setComboSavedOk(false), 2000);
+      // No editor do histórico (onSaved presente), fecha após o feedback.
+      if (onSaved) {
+        setTimeout(() => onSaved(), 900);
+      } else {
+        setTimeout(() => setComboSavedOk(false), 2000);
+      }
     });
   }
 
