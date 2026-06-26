@@ -32,6 +32,7 @@ export type CombinationSourceType =
   | "external"
   | "discarded"
   | "manual";
+export type CombinationStatus = "draft" | "saved" | "completed" | "archived";
 
 export interface Profile {
   id: string;
@@ -162,6 +163,8 @@ export interface CombinationOverride {
   duration_value: number;
   duration_unit: "months" | "weeks" | "days";
   notes: string | null;
+  status: CombinationStatus;        // migration 006
+  completed_at: string | null;      // migration 006
 }
 
 export interface CombinationItem {
